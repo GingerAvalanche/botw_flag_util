@@ -181,14 +181,15 @@ def generate_item_flags(moddir: Path) -> None:
 
 
 def generate(args):
+    directory: Path = Path(args.directory)
     if not args.actor and not args.revival:
         print("No flag options were chosen! Use -a and/or -r to generate flags.")
         exit()
 
     if args.revival:
-        generate_revival_flags(args.directory)
+        generate_revival_flags(directory)
     if args.actor:
-        generate_item_flags(args.directory)
+        generate_item_flags(directory)
 
     write_start = time.time()
     files_to_write: list = []
