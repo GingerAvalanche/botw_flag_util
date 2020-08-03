@@ -214,7 +214,7 @@ def mod_flag_bgdict(entry, old: int, datatype: str) -> None:
             new_param = entry[parameter].v
         except AttributeError:
             old_param = old_entry[parameter]
-            new_entry = entry[parameter]
+            new_param = entry[parameter]
         if not old_param == new_param:
             bgdict[datatype].pop(old)
             bgdict[datatype][entry["HashValue"].v] = entry
@@ -230,7 +230,7 @@ def mod_flag_svdict(entry, old: int, datatype: str) -> None:
             new_param = entry[parameter].v
         except AttributeError:
             old_param = old_entry[parameter]
-            new_entry = entry[parameter]
+            new_param = entry[parameter]
         if not old_param == new_param:
             svdict[datatype].pop(old)
             svdict[datatype][entry["HashValue"].v] = entry
@@ -319,18 +319,19 @@ def get_total_changes() -> int:
 
 
 def prep_entry_dicts_for_run(run_type: str) -> None:
+    sv_run_type: str = "game_data.sav"  # hack until someone ever edits something in caption or options
     if run_type not in new_gamedata_entries:
         new_gamedata_entries[run_type] = set()
-    if run_type not in new_savedata_entries:
-        new_savedata_entries["game_data.sav"] = set()
+    if sv_run_type not in new_savedata_entries:
+        new_savedata_entries[sv_run_type] = set()
     if run_type not in mod_gamedata_entries:
         mod_gamedata_entries[run_type] = set()
-    if run_type not in mod_savedata_entries:
-        mod_savedata_entries["game_data.sav"] = set()
+    if sv_run_type not in mod_savedata_entries:
+        mod_savedata_entries[sv_run_type] = set()
     if run_type not in del_gamedata_entries:
         del_gamedata_entries[run_type] = set()
-    if run_type not in del_savedata_entries:
-        del_savedata_entries["game_data.sav"] = set()
+    if sv_run_type not in del_savedata_entries:
+        del_savedata_entries[sv_run_type] = set()
 
 
 def get_verbose_output() -> str:

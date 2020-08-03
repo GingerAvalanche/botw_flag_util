@@ -34,14 +34,14 @@ def main() -> None:
     g_parser.add_argument(
         "-r", "--revival", help="Generate revival flags for actor instances", action="store_true",
     )
-    g_parser.add_argument(
-        "-v", "--verbose", help="Give verbose after-action report", action="store_true",
-    )
     g_parser.set_defaults(func=lambda a: generate(a))
 
     for p in [f_parser, g_parser]:
         p.add_argument(
             "-b", "--bigendian", help="Use big endian mode (for Wii U)", action="store_true",
+        )
+        p.add_argument(
+            "-v", "--verbose", help="Give verbose after-action report", action="store_true",
         )
 
     args = parser.parse_args()

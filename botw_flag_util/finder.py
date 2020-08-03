@@ -1,3 +1,6 @@
+from . import util
+
+
 def find(args):
     search_name = args.flag_name
     bg_todelete: dict = util.search_bgdict(search_name)
@@ -29,6 +32,7 @@ def find(args):
 
         elif selection == "d":
             for prefix, flagdata in bg_todelete.items():
+                util.prep_entry_dicts_for_run(prefix)
                 for hash in flagdata:
                     util.rem_flag_bgdict(hash, prefix)
             for file_name, flagdata in sv_todelete.items():

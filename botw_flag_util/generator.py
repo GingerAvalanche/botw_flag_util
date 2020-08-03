@@ -99,7 +99,13 @@ def isget_bgdata_flag(actor_name: str) -> int:
     entry["MinValue"] = False
     entry["ResetType"] = oead.S32(0)
 
-    util.new_flag_bgdict(entry, "bool_data")
+    old_flags: set = util.search_bgdict_part(flag_hash, "bool_data")
+
+    if len(old_flags) > 0:
+        for old in old_flags:
+            util.mod_flag_bgdict(entry, old, "bool_data")
+    else:
+        util.new_flag_bgdict(entry, "bool_data")
 
     return flag_hash
 
@@ -112,7 +118,13 @@ def isget_svdata_flag(actor_name: str) -> int:
     entry["DataName"] = flag_name
     entry["HashValue"] = oead.S32(flag_hash)
 
-    util.new_flag_svdict(entry, "game_data.sav")
+    old_flags: set = util.search_svdict_part(flag_hash, "game_data.sav")
+
+    if len(old_flags) > 0:
+        for old in old_flags:
+            util.mod_flag_svdict(entry, old, "game_data.sav")
+    else:
+        util.new_flag_svdict(entry, "game_data.sav")
 
     return flag_hash
 
