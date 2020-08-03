@@ -12,6 +12,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/GingerAvalanche/botw_flag_util",
+    include_package_data=True,
     packages=setuptools.find_packages(),
     entry_points={"console_scripts": ["botw_flag_util = botw_flag_util.__main__:main"]},
     classifiers=[
