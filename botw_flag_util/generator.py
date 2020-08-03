@@ -186,9 +186,9 @@ def generate(args):
         exit()
 
     if args.revival:
-        generate_revival_flags(directory)
+        generate_revival_flags(args.directory)
     if args.actor:
-        generate_item_flags(directory)
+        generate_item_flags(args.directory)
 
     write_start = time.time()
     files_to_write: list = []
