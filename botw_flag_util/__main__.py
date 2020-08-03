@@ -67,8 +67,8 @@ def main() -> None:
     files_to_write.append("GameData/gamedata.ssarc")
     files_to_write.append("GameData/savedataformat.ssarc")
     datas_to_write: list = []
-    datas_to_write.append(bcmlutil.compress(util.make_new_gamedata(args.big_endian)))
-    datas_to_write.append(bcmlutil.compress(util.make_new_savedata(args.big_endian)))
+    datas_to_write.append(bcmlutil.compress(util.make_new_gamedata(args.bigendian)))
+    datas_to_write.append(bcmlutil.compress(util.make_new_savedata(args.bigendian)))
     util.inject_files_into_bootup(bootup_path, files_to_write, datas_to_write)
     write_time = time.time() - write_start
 
