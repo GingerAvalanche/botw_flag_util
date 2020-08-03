@@ -169,8 +169,8 @@ def generate_item_flags(moddir: Path) -> None:
     sv_isget |= util.search_svdict_part("IsGet_Armor_", "game_data.sav")
     sv_isget |= util.search_svdict_part("IsGet_Weapon_", "game_data.sav")
 
-    f = EXEC_DIR / "data" / "isget_hashes.json"
-    vanilla_isget_hashes = set(json.loads(f.read_text(), encoding="utf-8")["isget_hashes"])
+    f = EXEC_DIR / "data" / "vanilla_hash.json"
+    vanilla_isget_hashes = set(json.loads(f.read_text(), encoding="utf-8")["isget_hash"])
     bg_isget_todelete = bg_isget - (mod_bg_isget | vanilla_isget_hashes)
     sv_isget_todelete = sv_isget - (mod_sv_isget | vanilla_isget_hashes)
 
