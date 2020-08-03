@@ -1,5 +1,6 @@
 import argparse
 import shutil
+import time
 from pathlib import Path
 
 from bcml import util as bcmlutil
@@ -61,6 +62,7 @@ def main() -> None:
 
     args.func(args)
 
+    write_start = time.time()
     files_to_write: list = []
     files_to_write.append("GameData/gamedata.ssarc")
     files_to_write.append("GameData/savedataformat.ssarc")
@@ -68,8 +70,10 @@ def main() -> None:
     datas_to_write.append(bcmlutil.compress(util.make_new_gamedata(args.big_endian)))
     datas_to_write.append(bcmlutil.compress(util.make_new_savedata(args.big_endian)))
     util.inject_files_into_bootup(bootup_path, files_to_write, datas_to_write)
+    write_time = time.time() - write_start
 
     if not util.get_total_changes() > 0:
+        print(f"\nFlag writing took {write_time} seconds...\n")
         print(f"{util.get_new_bgdict_changes()} New Game Data Entries")
         print(f"{util.get_mod_bgdict_changes()} Modified Game Data Entries")
         print(f"{util.get_del_bgdict_changes()} Deleted Game Data Entries")

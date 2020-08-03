@@ -190,23 +190,3 @@ def generate(args):
         generate_revival_flags(directory)
     if args.actor:
         generate_item_flags(directory)
-
-    write_start = time.time()
-    files_to_write: list = []
-    datas_to_write: list = []
-    if total_new_bg + total_mod_bg + total_del_bg > 0:
-        files_to_write.append("GameData/gamedata.ssarc")
-        datas_to_write.append(bcmlutil.compress(make_new_gamedata(big_endian)))
-        print(f"Wrote game data flag data...")
-    else:
-        print(f"No game data flag data to write. Skipping...")
-
-    if total_new_sv + total_mod_sv + total_del_sv > 0:
-        files_to_write.append("GameData/savedataformat.ssarc")
-        datas_to_write.append(bcmlutil.compress(make_new_savedata(big_endian)))
-        print(f"Wrote save flag data...")
-    else:
-        print(f"No save flag data to write. Skipping...")
-    util.inject_files_into_bootup(bootup_path, files_to_write, datas_to_write)
-    print(f"Injected to Bootup.pack...")
-    print(f"Flag writing took {time.time() - write_start} seconds...\n")
