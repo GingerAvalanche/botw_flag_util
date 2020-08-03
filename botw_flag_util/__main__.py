@@ -72,7 +72,7 @@ def main() -> None:
     util.inject_files_into_bootup(bootup_path, files_to_write, datas_to_write)
     write_time = time.time() - write_start
 
-    if not util.get_total_changes() > 0:
+    if util.get_total_changes() > 0:
         print(f"\nFlag writing took {write_time} seconds...\n")
         print(f"{util.get_new_bgdict_changes()} New Game Data Entries")
         print(f"{util.get_mod_bgdict_changes()} Modified Game Data Entries")
@@ -83,3 +83,5 @@ def main() -> None:
 
         if args.verbose:
             print(util.get_verbose_output())
+    else:
+        print("No changes were made.")

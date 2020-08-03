@@ -209,7 +209,13 @@ def new_flag_svdict(entry, datatype: str) -> None:
 def mod_flag_bgdict(entry, old: int, datatype: str) -> None:
     old_entry = bgdict[datatype][old]
     for parameter in old_entry.keys():
-        if not old_entry[parameter] == entry[parameter]:
+        try:
+            old_param = old_entry[parameter].v
+            new_param = entry[parameter].v
+        except AttributeError:
+            old_param = old_entry[parameter]
+            new_entry = entry[parameter]
+        if not old_param == new_param:
             bgdict[datatype].pop(old)
             bgdict[datatype][entry["HashValue"].v] = entry
             mod_gamedata_entries[datatype].add(entry["HashValue"].v)
@@ -219,7 +225,13 @@ def mod_flag_bgdict(entry, old: int, datatype: str) -> None:
 def mod_flag_svdict(entry, old: int, datatype: str) -> None:
     old_entry = svdict[datatype][old]
     for parameter in old_entry.keys():
-        if not old_entry[parameter] == entry[parameter]:
+        try:
+            old_param = old_entry[parameter].v
+            new_param = entry[parameter].v
+        except AttributeError:
+            old_param = old_entry[parameter]
+            new_entry = entry[parameter]
+        if not old_param == new_param:
             svdict[datatype].pop(old)
             svdict[datatype][entry["HashValue"].v] = entry
             mod_savedata_entries[datatype].add(entry["HashValue"].v)
