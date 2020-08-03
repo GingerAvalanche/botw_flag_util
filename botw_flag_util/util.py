@@ -310,15 +310,15 @@ def prep_entry_dicts_for_run(run_type: str) -> None:
     if run_type not in new_gamedata_entries:
         new_gamedata_entries[run_type] = set()
     if run_type not in new_savedata_entries:
-        new_savedata_entries[run_type] = set()
+        new_savedata_entries["game_data.sav"] = set()
     if run_type not in mod_gamedata_entries:
         mod_gamedata_entries[run_type] = set()
     if run_type not in mod_savedata_entries:
-        mod_savedata_entries[run_type] = set()
+        mod_savedata_entries["game_data.sav"] = set()
     if run_type not in del_gamedata_entries:
         del_gamedata_entries[run_type] = set()
     if run_type not in del_savedata_entries:
-        del_savedata_entries[run_type] = set()
+        del_savedata_entries["game_data.sav"] = set()
 
 
 def get_verbose_output() -> str:
