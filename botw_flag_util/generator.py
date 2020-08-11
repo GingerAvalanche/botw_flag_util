@@ -81,6 +81,42 @@ def revival_svdata_flag(new_obj, old_obj) -> None:
         util.new_flag_svdict(entry, "game_data.sav")
 
 
+def generate_revival_flags(moddir: Path) -> None:
+    util.prep_entry_dicts_for_run("revival_bool_data")
+
+    for map_unit in moddir.rglob("**/*_*.smubin"):
+        map_start = time.time()
+        map_data = oead.byml.from_binary(bcmlutil.decompress(map_unit.read_bytes()))
+        map_hashes = [obj["HashId"].v for obj in map_data["Objs"]]
+        map_section = map_unit.stem.split("_")
+        stock_map = mubin.get_stock_map((map_section[0], map_section[1]))
+        stock_hashes = [obj["HashId"].v for obj in stock_map["Objs"]]
+        for obj in map_data["Objs"]:
+            if obj["HashId"].v not in stock_hashes and not any(
+                excl in obj["UnitConfigName"] for excl in ["Area", "Sphere", "LinkTag"]
+            ):
+                revival_bgdata_flag(obj, obj)
+                revival_svdata_flag(obj, obj)
+            elif obj["HashId"].v in stock_hashes and not any(
+                excl in obj["UnitConfigName"] for excl in ["Area", "Sphere", "LinkTag"]
+            ):
+                stock_obj = stock_map["Objs"][stock_hashes.index(obj["HashId"].v)]
+                name_changed = obj["UnitConfigName"] != stock_obj["UnitConfigName"]
+                event_assoc_changed = bool("LinksToObj" in obj) != bool("LinksToObj" in stock_obj)
+                if name_changed or event_assoc_changed:
+                    revival_bgdata_flag(obj, stock_obj)
+                    if name_changed:
+                        revival_svdata_flag(obj, stock_obj)
+        for obj in stock_map["Objs"]:
+            if obj["HashId"].v not in map_hashes:
+                old_hash: int = ctypes.c_int32(
+                    zlib.crc32(f"MainField_{obj['UnitConfigName']}_{obj['HashId'].v}".encode())
+                ).value
+                util.rem_flag_bgdict(old_hash, "revival_bool_data")
+                util.rem_flag_svdict(old_hash, "game_data.sav")
+        print(f"Finished processing {map_unit.name} in {time.time() - map_start} seconds...")
+
+
 def isget_bgdata_flag(actor_name: str) -> int:
     flag_name: str = f"IsGet_{actor_name}"
     flag_hash: int = ctypes.c_int32(zlib.crc32(flag_name.encode())).value
@@ -127,34 +163,6 @@ def isget_svdata_flag(actor_name: str) -> int:
         util.new_flag_svdict(entry, "game_data.sav")
 
     return flag_hash
-
-
-def generate_revival_flags(moddir: Path) -> None:
-    util.prep_entry_dicts_for_run("revival_bool_data")
-
-    for map_unit in moddir.rglob("**/*_*.smubin"):
-        map_start = time.time()
-        map_data = oead.byml.from_binary(bcmlutil.decompress(map_unit.read_bytes()))
-        map_section = map_unit.stem.split("_")
-        stock_map = mubin.get_stock_map((map_section[0], map_section[1]))
-        stock_hashes = [obj["HashId"].v for obj in stock_map["Objs"]]
-        for obj in map_data["Objs"]:
-            if obj["HashId"].v not in stock_hashes and not any(
-                excl in obj["UnitConfigName"] for excl in ["Area", "Sphere", "LinkTag"]
-            ):
-                revival_bgdata_flag(obj, obj)
-                revival_svdata_flag(obj, obj)
-            elif obj["HashId"].v in stock_hashes and not any(
-                excl in obj["UnitConfigName"] for excl in ["Area", "Sphere", "LinkTag"]
-            ):
-                stock_obj = stock_map["Objs"][stock_hashes.index(obj["HashId"].v)]
-                name_changed = obj["UnitConfigName"] != stock_obj["UnitConfigName"]
-                event_assoc_changed = bool("LinksToObj" in obj) != bool("LinksToObj" in stock_obj)
-                if name_changed or event_assoc_changed:
-                    revival_bgdata_flag(obj, stock_obj)
-                    if name_changed:
-                        revival_svdata_flag(obj, stock_obj)
-        print(f"Finished processing {map_unit.name} in {time.time() - map_start} seconds...")
 
 
 def generate_item_flags(moddir: Path) -> None:
