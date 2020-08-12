@@ -117,17 +117,19 @@ def generate_revival_flags(moddir: Path) -> None:
         print(f"Finished processing {map_unit.name} in {time.time() - map_start} seconds...")
 
 
-def isget_bgdata_flag(actor_name: str) -> int:
-    flag_name: str = f"IsGet_{actor_name}"
+def actor_bool_bgdata_flag(flag_type: str, actor_name: str, cat: int = -1) -> int:
+    flag_name: str = f"{flag_type}_{actor_name}"
     flag_hash: int = ctypes.c_int32(zlib.crc32(flag_name.encode())).value
 
     entry = oead.byml.Hash()
+    if not cat == -1:
+        entry["Category"] = oead.S32(cat)
     entry["DataName"] = flag_name
     entry["DeleteRev"] = oead.S32(-1)
     entry["HashValue"] = oead.S32(flag_hash)
     entry["InitValue"] = oead.S32(0)
     entry["IsEventAssociated"] = False
-    entry["IsOneTrigger"] = True
+    entry["IsOneTrigger"] = True if flag_type == "IsGet" else False
     entry["IsProgramReadable"] = True
     entry["IsProgramWritable"] = True
     entry["IsSave"] = True
@@ -146,8 +148,37 @@ def isget_bgdata_flag(actor_name: str) -> int:
     return flag_hash
 
 
-def isget_svdata_flag(actor_name: str) -> int:
-    flag_name: str = f"IsGet_{actor_name}"
+def actor_s32_bgdata_flag(flag_type: str, actor_name: str) -> int:
+    flag_name: str = f"{flag_type}_{actor_name}"
+    flag_hash: int = ctypes.c_int32(zlib.crc32(flag_name.encode())).value
+
+    entry = oead.byml.Hash()
+    entry["DataName"] = flag_name
+    entry["DeleteRev"] = oead.S32(-1)
+    entry["HashValue"] = oead.S32(flag_hash)
+    entry["InitValue"] = oead.S32(0)
+    entry["IsEventAssociated"] = False
+    entry["IsOneTrigger"] = False
+    entry["IsProgramReadable"] = True
+    entry["IsProgramWritable"] = True
+    entry["IsSave"] = True
+    entry["MaxValue"] = oead.S32(2147483647)
+    entry["MinValue"] = oead.S32(0)
+    entry["ResetType"] = oead.S32(0)
+
+    old_flags: set = util.search_bgdict_part(flag_hash, "s32_data")
+
+    if len(old_flags) > 0:
+        for old in old_flags:
+            util.mod_flag_bgdict(entry, old, "s32_data")
+    else:
+        util.new_flag_bgdict(entry, "s32_data")
+
+    return flag_hash
+
+
+def actor_svdata_flag(flag_type: str, actor_name: str) -> int:
+    flag_name: str = f"{flag_type}_{actor_name}"
     flag_hash: int = ctypes.c_int32(zlib.crc32(flag_name.encode())).value
 
     entry = oead.byml.Hash()
@@ -165,38 +196,84 @@ def isget_svdata_flag(actor_name: str) -> int:
     return flag_hash
 
 
+def get_current_bg_item_flags(flag_type: str, prefix: str) -> set:
+    r: set = set()
+    r |= util.search_bgdict_part(f"{flag_type}_Item_", prefix)
+    r |= util.search_bgdict_part(f"{flag_type}_Armor_", prefix)
+    r |= util.search_bgdict_part(f"{flag_type}_Weapon_", prefix)
+    return r
+
+
+def get_current_sv_item_flags(flag_type: str, file_name: str) -> set:
+    r: set = set()
+    r |= util.search_svdict_part(f"{flag_type}_Item_", file_name)
+    r |= util.search_svdict_part(f"{flag_type}_Armor_", file_name)
+    r |= util.search_svdict_part(f"{flag_type}_Weapon_", file_name)
+    return r
+
+
 def generate_item_flags(moddir: Path) -> None:
     util.prep_entry_dicts_for_run("bool_data")
+    util.prep_entry_dicts_for_run("s32_data")
 
-    mod_bg_isget: set = set()
-    mod_sv_isget: set = set()
+    mod_bg: set = set()
+    mod_sv: set = set()
     for item_actor in moddir.rglob("**/Item_*.sbactorpack"):
-        mod_bg_isget.add(isget_bgdata_flag(str(item_actor.stem)))
-        mod_sv_isget.add(isget_svdata_flag(str(item_actor.stem)))
+        mod_bg.add(actor_bool_bgdata_flag("IsNewPictureBook", str(item_actor.stem)))
+        mod_bg.add(actor_bool_bgdata_flag("IsRegisteredPictureBook", str(item_actor.stem), 4))
+        mod_bg.add(actor_bool_bgdata_flag("IsGet", str(item_actor.stem)))
+        mod_bg.add(actor_s32_bgdata_flag("PictureBookSize", str(item_actor.stem)))
+        mod_sv.add(actor_svdata_flag("IsNewPictureBook", str(item_actor.stem)))
+        mod_sv.add(actor_svdata_flag("IsRegisteredPictureBook", str(item_actor.stem)))
+        mod_sv.add(actor_svdata_flag("IsGet", str(item_actor.stem)))
+        mod_sv.add(actor_svdata_flag("PictureBookSize", str(item_actor.stem)))
     for armor_actor in moddir.rglob("**/Armor_*.sbactorpack"):
-        mod_bg_isget.add(isget_bgdata_flag(str(armor_actor.stem)))
-        mod_sv_isget.add(isget_svdata_flag(str(armor_actor.stem)))
+        mod_bg.add(actor_bool_bgdata_flag("IsGet", str(armor_actor.stem)))
+        mod_bg.add(actor_s32_bgdata_flag("EquipTime", str(armor_actor.stem)))
+        mod_bg.add(actor_s32_bgdata_flag("PorchTime", str(armor_actor.stem)))
+        mod_sv.add(actor_svdata_flag("IsGet", str(armor_actor.stem)))
+        mod_sv.add(actor_svdata_flag("EquipTime", str(armor_actor.stem)))
+        mod_sv.add(actor_svdata_flag("PorchTime", str(armor_actor.stem)))
     for weapon_actor in moddir.rglob("**/Weapon_*.sbactorpack"):
-        mod_bg_isget.add(isget_bgdata_flag(str(weapon_actor.stem)))
-        mod_sv_isget.add(isget_svdata_flag(str(weapon_actor.stem)))
+        mod_bg.add(actor_bool_bgdata_flag("IsNewPictureBook", str(weapon_actor.stem)))
+        mod_bg.add(actor_bool_bgdata_flag("IsRegisteredPictureBook", str(weapon_actor.stem), 5))
+        mod_bg.add(actor_bool_bgdata_flag("IsGet", str(weapon_actor.stem)))
+        mod_bg.add(actor_s32_bgdata_flag("PictureBookSize", str(weapon_actor.stem)))
+        mod_bg.add(actor_s32_bgdata_flag("EquipTime", str(weapon_actor.stem)))
+        mod_bg.add(actor_s32_bgdata_flag("PorchTime", str(weapon_actor.stem)))
+        mod_sv.add(actor_svdata_flag("IsNewPictureBook", str(weapon_actor.stem)))
+        mod_sv.add(actor_svdata_flag("IsRegisteredPictureBook", str(weapon_actor.stem)))
+        mod_sv.add(actor_svdata_flag("IsGet", str(weapon_actor.stem)))
+        mod_sv.add(actor_svdata_flag("PictureBookSize", str(weapon_actor.stem)))
+        mod_sv.add(actor_svdata_flag("EquipTime", str(weapon_actor.stem)))
+        mod_sv.add(actor_svdata_flag("PorchTime", str(weapon_actor.stem)))
 
-    bg_isget: set = set()
-    bg_isget |= util.search_bgdict_part("IsGet_Item_", "bool_data")
-    bg_isget |= util.search_bgdict_part("IsGet_Armor_", "bool_data")
-    bg_isget |= util.search_bgdict_part("IsGet_Weapon_", "bool_data")
-    sv_isget: set = set()
-    sv_isget |= util.search_svdict_part("IsGet_Item_", "game_data.sav")
-    sv_isget |= util.search_svdict_part("IsGet_Armor_", "game_data.sav")
-    sv_isget |= util.search_svdict_part("IsGet_Weapon_", "game_data.sav")
+    total_bg: set = set()
+    total_bg |= get_current_bg_item_flags("IsNewPictureBook", "bool_data")
+    total_bg |= get_current_bg_item_flags("IsRegisteredPictureBook", "bool_data")
+    total_bg |= get_current_bg_item_flags("IsGet", "bool_data")
+    total_bg |= get_current_bg_item_flags("PictureBookSize", "s32_data")
+    total_bg |= get_current_bg_item_flags("EquipTime", "s32_data")
+    total_bg |= get_current_bg_item_flags("PorchTime", "s32_data")
+    total_sv: set = set()
+    total_sv |= get_current_sv_item_flags("IsNewPictureBook", "game_data.sav")
+    total_sv |= get_current_sv_item_flags("IsRegisteredPictureBook", "game_data.sav")
+    total_sv |= get_current_sv_item_flags("IsGet", "game_data.sav")
+    total_sv |= get_current_sv_item_flags("PictureBookSize", "game_data.sav")
+    total_sv |= get_current_sv_item_flags("EquipTime", "game_data.sav")
+    total_sv |= get_current_sv_item_flags("PorchTime", "game_data.sav")
 
     f = EXEC_DIR / "data" / "vanilla_hash.json"
-    vanilla_isget_hashes = set(json.loads(f.read_text(), encoding="utf-8")["isget_hash"])
-    bg_isget_todelete = bg_isget - (mod_bg_isget | vanilla_isget_hashes)
-    sv_isget_todelete = sv_isget - (mod_sv_isget | vanilla_isget_hashes)
+    vanilla_hashes: set = set()
+    vanilla_hash_dict = json.loads(f.read_text())
+    for _, hash_list in vanilla_hash_dict.items():
+        vanilla_hashes |= set(hash_list)
+    bg_todelete = total_bg - (mod_bg | vanilla_hashes)
+    sv_todelete = total_sv - (mod_sv | vanilla_hashes)
 
-    for hash in bg_isget_todelete:
+    for hash in bg_todelete:
         util.rem_flag_bgdict(hash, "bool_data")
-    for hash in sv_isget_todelete:
+    for hash in sv_todelete:
         util.rem_flag_svdict(hash, "game_data.sav")
 
 

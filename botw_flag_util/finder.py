@@ -25,10 +25,10 @@ def find(args):
         if selection == "v":
             for prefix, flagdata in bg_todelete.items():
                 for hash in flagdata:
-                    print(f"{bgdict[prefix][hash]['DataName']} in {prefix}")
+                    print(f"{util.bgdict[prefix][hash]['DataName']} in {prefix}")
             for file_name, flagdata in sv_todelete.items():
                 for hash in flagdata:
-                    print(f"{svdict[file_name][hash]['DataName']} in {file_name}")
+                    print(f"{util.svdict[file_name][hash]['DataName']} in {file_name}")
 
         elif selection == "d":
             for prefix, flagdata in bg_todelete.items():
