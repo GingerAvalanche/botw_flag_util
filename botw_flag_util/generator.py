@@ -83,6 +83,8 @@ def revival_svdata_flag(new_obj, old_obj) -> None:
 
 def generate_revival_flags(moddir: Path) -> None:
     util.prep_entry_dicts_for_run("revival_bool_data")
+    ignore_hashes: set = set()
+    delete_hashes: set = set()
 
     for map_unit in moddir.rglob("**/*_*.smubin"):
         map_start = time.time()
@@ -92,6 +94,11 @@ def generate_revival_flags(moddir: Path) -> None:
         stock_map = mubin.get_stock_map((map_section[0], map_section[1]))
         stock_hashes = [obj["HashId"].v for obj in stock_map["Objs"]]
         for obj in map_data["Objs"]:
+            ignore_hashes.add(
+                ctypes.c_int32(
+                    zlib.crc32(f"MainField_{obj['UnitConfigName']}_{obj['HashId'].v}".encode())
+                ).value
+            )
             if obj["HashId"].v not in stock_hashes and not any(
                 excl in obj["UnitConfigName"] for excl in ["Area", "Sphere", "LinkTag"]
             ):
@@ -112,9 +119,12 @@ def generate_revival_flags(moddir: Path) -> None:
                 old_hash: int = ctypes.c_int32(
                     zlib.crc32(f"MainField_{obj['UnitConfigName']}_{obj['HashId'].v}".encode())
                 ).value
-                util.rem_flag_bgdict(old_hash, "revival_bool_data")
-                util.rem_flag_svdict(old_hash, "game_data.sav")
+                delete_hashes.add(old_hash)
         print(f"Finished processing {map_unit.name} in {time.time() - map_start} seconds...")
+    for hash in delete_hashes:
+        if hash not in ignore_hashes:
+            util.rem_flag_bgdict(old_hash, "revival_bool_data")
+            util.rem_flag_svdict(old_hash, "game_data.sav")
 
 
 def actor_bool_bgdata_flag(flag_type: str, actor_name: str, cat: int = -1) -> int:
@@ -196,22 +206,6 @@ def actor_svdata_flag(flag_type: str, actor_name: str) -> int:
     return flag_hash
 
 
-def get_current_bg_item_flags(flag_type: str, prefix: str) -> set:
-    r: set = set()
-    r |= util.search_bgdict_part(f"{flag_type}_Item_", prefix)
-    r |= util.search_bgdict_part(f"{flag_type}_Armor_", prefix)
-    r |= util.search_bgdict_part(f"{flag_type}_Weapon_", prefix)
-    return r
-
-
-def get_current_sv_item_flags(flag_type: str, file_name: str) -> set:
-    r: set = set()
-    r |= util.search_svdict_part(f"{flag_type}_Item_", file_name)
-    r |= util.search_svdict_part(f"{flag_type}_Armor_", file_name)
-    r |= util.search_svdict_part(f"{flag_type}_Weapon_", file_name)
-    return r
-
-
 def generate_item_flags(moddir: Path) -> None:
     util.prep_entry_dicts_for_run("bool_data")
     util.prep_entry_dicts_for_run("s32_data")
@@ -249,19 +243,19 @@ def generate_item_flags(moddir: Path) -> None:
         mod_sv.add(actor_svdata_flag("PorchTime", str(weapon_actor.stem)))
 
     total_bg: set = set()
-    total_bg |= get_current_bg_item_flags("IsNewPictureBook", "bool_data")
-    total_bg |= get_current_bg_item_flags("IsRegisteredPictureBook", "bool_data")
-    total_bg |= get_current_bg_item_flags("IsGet", "bool_data")
-    total_bg |= get_current_bg_item_flags("PictureBookSize", "s32_data")
-    total_bg |= get_current_bg_item_flags("EquipTime", "s32_data")
-    total_bg |= get_current_bg_item_flags("PorchTime", "s32_data")
+    total_bg |= util.search_bgdict_part("IsNewPictureBook_", "bool_data")
+    total_bg |= util.search_bgdict_part("IsRegisteredPictureBook_", "bool_data")
+    total_bg |= util.search_bgdict_part("IsGet_", "bool_data")
+    total_bg |= util.search_bgdict_part("PictureBookSize_", "s32_data")
+    total_bg |= util.search_bgdict_part("EquipTime_", "s32_data")
+    total_bg |= util.search_bgdict_part("PorchTime_", "s32_data")
     total_sv: set = set()
-    total_sv |= get_current_sv_item_flags("IsNewPictureBook", "game_data.sav")
-    total_sv |= get_current_sv_item_flags("IsRegisteredPictureBook", "game_data.sav")
-    total_sv |= get_current_sv_item_flags("IsGet", "game_data.sav")
-    total_sv |= get_current_sv_item_flags("PictureBookSize", "game_data.sav")
-    total_sv |= get_current_sv_item_flags("EquipTime", "game_data.sav")
-    total_sv |= get_current_sv_item_flags("PorchTime", "game_data.sav")
+    total_sv |= util.search_svdict_part("IsNewPictureBook_", "game_data.sav")
+    total_sv |= util.search_svdict_part("IsRegisteredPictureBook_", "game_data.sav")
+    total_sv |= util.search_svdict_part("IsGet_", "game_data.sav")
+    total_sv |= util.search_svdict_part("PictureBookSize_", "game_data.sav")
+    total_sv |= util.search_svdict_part("EquipTime_", "game_data.sav")
+    total_sv |= util.search_svdict_part("PorchTime_", "game_data.sav")
 
     f = EXEC_DIR / "data" / "vanilla_hash.json"
     vanilla_hashes: set = set()
