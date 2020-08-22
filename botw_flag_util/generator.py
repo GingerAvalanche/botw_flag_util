@@ -11,12 +11,10 @@ from bcml import util as bcmlutil
 from . import EXEC_DIR, gdata_file_prefixes, util
 
 
-def should_not_make_flag(obj) -> bool:
-    try:
-        # return not obj["!Parameters"]["MakeFlag"]
-        return obj["!Parameters"]["NoFlag"]
-    except KeyError:
-        return False
+def should_make_flag(obj) -> bool:
+    if "FlagData" in obj["!Parameters"]:
+        return True
+    return False
 
 
 def revival_bgdata_flag(new_obj, old_obj) -> None:
@@ -26,7 +24,7 @@ def revival_bgdata_flag(new_obj, old_obj) -> None:
     new_name: str = f"MainField_{new_obj['UnitConfigName']}_{new_obj['HashId'].v}"
     new_hash: int = ctypes.c_int32(zlib.crc32(new_name.encode())).value
 
-    if should_not_make_flag(new_obj):
+    if not should_make_flag(new_obj):
         util.rem_flag_bgdict(old_hash, "revival_bool_data")
         util.rem_flag_bgdict(new_hash, "revival_bool_data")
         return
@@ -43,7 +41,7 @@ def revival_bgdata_flag(new_obj, old_obj) -> None:
     entry["IsSave"] = True
     entry["MaxValue"] = True
     entry["MinValue"] = False
-    entry["ResetType"] = oead.S32(1)
+    entry["ResetType"] = oead.S32(new_obj["!Parameters"]["FlagData"]["ResetType"])
 
     old_flags: set = util.search_bgdict_part(old_hash, "revival_bool_data")
     old_flags |= util.search_bgdict_part(new_hash, "revival_bool_data")
@@ -62,7 +60,7 @@ def revival_svdata_flag(new_obj, old_obj) -> None:
     new_name: str = f"MainField_{new_obj['UnitConfigName']}_{new_obj['HashId'].v}"
     new_hash: int = ctypes.c_int32(zlib.crc32(new_name.encode())).value
 
-    if should_not_make_flag(new_obj):
+    if not should_make_flag(new_obj):
         util.rem_flag_svdict(old_hash, "game_data.sav")
         util.rem_flag_svdict(new_hash, "game_data.sav")
         return
@@ -99,14 +97,10 @@ def generate_revival_flags(moddir: Path) -> None:
                     zlib.crc32(f"MainField_{obj['UnitConfigName']}_{obj['HashId'].v}".encode())
                 ).value
             )
-            if obj["HashId"].v not in stock_hashes and not any(
-                excl in obj["UnitConfigName"] for excl in ["Area", "Sphere", "LinkTag"]
-            ):
+            if obj["HashId"].v not in stock_hashes:
                 revival_bgdata_flag(obj, obj)
                 revival_svdata_flag(obj, obj)
-            elif obj["HashId"].v in stock_hashes and not any(
-                excl in obj["UnitConfigName"] for excl in ["Area", "Sphere", "LinkTag"]
-            ):
+            else:
                 stock_obj = stock_map["Objs"][stock_hashes.index(obj["HashId"].v)]
                 name_changed = obj["UnitConfigName"] != stock_obj["UnitConfigName"]
                 event_assoc_changed = bool("LinksToObj" in obj) != bool("LinksToObj" in stock_obj)

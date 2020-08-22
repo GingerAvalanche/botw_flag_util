@@ -23,6 +23,14 @@ The following `pip` packages, which will be automatically installed:
 * `-b` - Use big-endian mode. For generating flags for Wii U.
 * `-v` - Use verbose mode. Will give more verbose after-action report.
 
+NOTE: As of 0.0.16, you need to add an object to the `!Parameters` section of your map actors to have the flag be generated. This is done to minimize the impact on `mubin` size (for RSTB concerns) but still allow you to set the ResetType - and perhaps other values, in the future - without making the flag, yourself. The object will look similar to this:
+```
+"FlagData": {
+    "ResetType": 1
+}
+```
+The value for ResetType is described here: https://zeldamods.org/wiki/GameDataMgr#Reset_flags
+
 #### Find flags:
 `botw_flag_util find [path_to_mod_root] [search_name] [-b] [-v]`
 * `path_to_mod_root` - The path to the root folder of your mod, which contains the `content` folder. Required.
