@@ -19,11 +19,11 @@ def should_not_make_flag(obj) -> bool:
         return False
 
 
-def revival_bgdata_flag(new_obj, old_obj, resettype: int = 1) -> None:
+def revival_bgdata_flag(new_obj, old_obj, fieldname: str, resettype: int = 1) -> None:
     old_hash: int = ctypes.c_int32(
-        zlib.crc32(f"MainField_{old_obj['UnitConfigName']}_{old_obj['HashId'].v}".encode())
+        zlib.crc32(f"{fieldname}_{old_obj['UnitConfigName']}_{old_obj['HashId'].v}".encode())
     ).value
-    new_name: str = f"MainField_{new_obj['UnitConfigName']}_{new_obj['HashId'].v}"
+    new_name: str = f"{fieldname}_{new_obj['UnitConfigName']}_{new_obj['HashId'].v}"
     new_hash: int = ctypes.c_int32(zlib.crc32(new_name.encode())).value
 
     if should_not_make_flag(new_obj):
@@ -55,11 +55,11 @@ def revival_bgdata_flag(new_obj, old_obj, resettype: int = 1) -> None:
         util.new_flag_bgdict(entry, "revival_bool_data")
 
 
-def revival_svdata_flag(new_obj, old_obj) -> None:
+def revival_svdata_flag(new_obj, old_obj, fieldname: str) -> None:
     old_hash: int = ctypes.c_int32(
-        zlib.crc32(f"MainField_{old_obj['UnitConfigName']}_{old_obj['HashId'].v}".encode())
+        zlib.crc32(f"{fieldname}_{old_obj['UnitConfigName']}_{old_obj['HashId'].v}".encode())
     ).value
-    new_name: str = f"MainField_{new_obj['UnitConfigName']}_{new_obj['HashId'].v}"
+    new_name: str = f"{fieldname}_{new_obj['UnitConfigName']}_{new_obj['HashId'].v}"
     new_hash: int = ctypes.c_int32(zlib.crc32(new_name.encode())).value
 
     if should_not_make_flag(new_obj):
@@ -97,8 +97,8 @@ def generate_revival_flags_for_map(
         if obj["HashId"].v not in stock_hashes and not any(
             excl in obj["UnitConfigName"] for excl in ["Area", "Sphere", "LinkTag"]
         ):
-            revival_bgdata_flag(obj, obj, resettype)
-            revival_svdata_flag(obj, obj)
+            revival_bgdata_flag(obj, obj, fieldname, resettype)
+            revival_svdata_flag(obj, obj, fieldname)
         elif obj["HashId"].v in stock_hashes and not any(
             excl in obj["UnitConfigName"] for excl in ["Area", "Sphere", "LinkTag"]
         ):
@@ -106,9 +106,9 @@ def generate_revival_flags_for_map(
             name_changed = obj["UnitConfigName"] != stock_obj["UnitConfigName"]
             event_assoc_changed = bool("LinksToObj" in obj) != bool("LinksToObj" in stock_obj)
             if name_changed or event_assoc_changed:
-                revival_bgdata_flag(obj, stock_obj, resettype)
+                revival_bgdata_flag(obj, stock_obj, fieldname, resettype)
                 if name_changed:
-                    revival_svdata_flag(obj, stock_obj)
+                    revival_svdata_flag(obj, stock_obj, fieldname)
     for obj in stock_map["Objs"]:
         if obj["HashId"].v not in map_hashes:
             old_hash: int = ctypes.c_int32(
