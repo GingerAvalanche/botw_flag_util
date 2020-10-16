@@ -32,7 +32,13 @@ def main() -> None:
         "-a", "--actor", help="Generate IsGet_/compendium flags for actors", action="store_true",
     )
     g_parser.add_argument(
-        "-r", "--revival", help="Generate revival flags for actor instances", action="store_true",
+        "-r",
+        "--revival",
+        action="store",
+        nargs=2,
+        default=[-1, -1],
+        type=int,
+        help="Generate revival flags for actor instances",
     )
     g_parser.set_defaults(func=lambda a: generate(a))
 

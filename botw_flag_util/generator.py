@@ -11,20 +11,22 @@ from bcml import util as bcmlutil
 from . import EXEC_DIR, gdata_file_prefixes, util
 
 
-def should_make_flag(obj) -> bool:
-    if "FlagData" in obj["!Parameters"]:
-        return True
-    return False
+def should_not_make_flag(obj) -> bool:
+    try:
+        # return not obj["!Parameters"]["MakeFlag"]
+        return obj["!Parameters"]["NoFlag"]
+    except KeyError:
+        return False
 
 
-def revival_bgdata_flag(new_obj, old_obj) -> None:
+def revival_bgdata_flag(new_obj, old_obj, resettype: int = 1) -> None:
     old_hash: int = ctypes.c_int32(
         zlib.crc32(f"MainField_{old_obj['UnitConfigName']}_{old_obj['HashId'].v}".encode())
     ).value
     new_name: str = f"MainField_{new_obj['UnitConfigName']}_{new_obj['HashId'].v}"
     new_hash: int = ctypes.c_int32(zlib.crc32(new_name.encode())).value
 
-    if not should_make_flag(new_obj):
+    if should_not_make_flag(new_obj):
         util.rem_flag_bgdict(old_hash, "revival_bool_data")
         util.rem_flag_bgdict(new_hash, "revival_bool_data")
         return
@@ -41,7 +43,7 @@ def revival_bgdata_flag(new_obj, old_obj) -> None:
     entry["IsSave"] = True
     entry["MaxValue"] = True
     entry["MinValue"] = False
-    entry["ResetType"] = oead.S32(new_obj["!Parameters"]["FlagData"]["ResetType"])
+    entry["ResetType"] = oead.S32(resettype)
 
     old_flags: set = util.search_bgdict_part(old_hash, "revival_bool_data")
     old_flags |= util.search_bgdict_part(new_hash, "revival_bool_data")
@@ -60,7 +62,7 @@ def revival_svdata_flag(new_obj, old_obj) -> None:
     new_name: str = f"MainField_{new_obj['UnitConfigName']}_{new_obj['HashId'].v}"
     new_hash: int = ctypes.c_int32(zlib.crc32(new_name.encode())).value
 
-    if not should_make_flag(new_obj):
+    if should_not_make_flag(new_obj):
         util.rem_flag_svdict(old_hash, "game_data.sav")
         util.rem_flag_svdict(new_hash, "game_data.sav")
         return
@@ -79,46 +81,87 @@ def revival_svdata_flag(new_obj, old_obj) -> None:
         util.new_flag_svdict(entry, "game_data.sav")
 
 
-def generate_revival_flags(moddir: Path) -> None:
+def generate_revival_flags_for_map(
+    map_data: oead.byml.Hash, stock_map: oead.byml.Hash, fieldname: str, resettype: int
+) -> dict:
+    r: dict = {"ignore": set(), "delete": set()}
+
+    map_hashes = [obj["HashId"].v for obj in map_data["Objs"]]
+    stock_hashes = [obj["HashId"].v for obj in stock_map["Objs"]]
+    for obj in map_data["Objs"]:
+        r["ignore"].add(
+            ctypes.c_int32(
+                zlib.crc32(f"{fieldname}_{obj['UnitConfigName']}_{obj['HashId'].v}".encode())
+            ).value
+        )
+        if obj["HashId"].v not in stock_hashes and not any(
+            excl in obj["UnitConfigName"] for excl in ["Area", "Sphere", "LinkTag"]
+        ):
+            revival_bgdata_flag(obj, obj, resettype)
+            revival_svdata_flag(obj, obj)
+        elif obj["HashId"].v in stock_hashes and not any(
+            excl in obj["UnitConfigName"] for excl in ["Area", "Sphere", "LinkTag"]
+        ):
+            stock_obj = stock_map["Objs"][stock_hashes.index(obj["HashId"].v)]
+            name_changed = obj["UnitConfigName"] != stock_obj["UnitConfigName"]
+            event_assoc_changed = bool("LinksToObj" in obj) != bool("LinksToObj" in stock_obj)
+            if name_changed or event_assoc_changed:
+                revival_bgdata_flag(obj, stock_obj, resettype)
+                if name_changed:
+                    revival_svdata_flag(obj, stock_obj)
+    for obj in stock_map["Objs"]:
+        if obj["HashId"].v not in map_hashes:
+            old_hash: int = ctypes.c_int32(
+                zlib.crc32(f"{fieldname}_{obj['UnitConfigName']}_{obj['HashId'].v}".encode())
+            ).value
+            r["delete"].add(old_hash)
+
+    return r
+
+
+def generate_revival_flags(moddir: Path, resettypes: list) -> None:
     util.prep_entry_dicts_for_run("revival_bool_data")
     ignore_hashes: set = set()
     delete_hashes: set = set()
 
-    for map_unit in moddir.rglob("**/*_*.smubin"):
-        map_start = time.time()
-        map_data = oead.byml.from_binary(bcmlutil.decompress(map_unit.read_bytes()))
-        map_hashes = [obj["HashId"].v for obj in map_data["Objs"]]
-        map_section = map_unit.stem.split("_")
-        stock_map = mubin.get_stock_map((map_section[0], map_section[1]))
-        stock_hashes = [obj["HashId"].v for obj in stock_map["Objs"]]
-        for obj in map_data["Objs"]:
-            ignore_hashes.add(
-                ctypes.c_int32(
-                    zlib.crc32(f"MainField_{obj['UnitConfigName']}_{obj['HashId'].v}".encode())
-                ).value
-            )
-            if obj["HashId"].v not in stock_hashes:
-                revival_bgdata_flag(obj, obj)
-                revival_svdata_flag(obj, obj)
-            else:
-                stock_obj = stock_map["Objs"][stock_hashes.index(obj["HashId"].v)]
-                name_changed = obj["UnitConfigName"] != stock_obj["UnitConfigName"]
-                event_assoc_changed = bool("LinksToObj" in obj) != bool("LinksToObj" in stock_obj)
-                if name_changed or event_assoc_changed:
-                    revival_bgdata_flag(obj, stock_obj)
-                    if name_changed:
-                        revival_svdata_flag(obj, stock_obj)
-        for obj in stock_map["Objs"]:
-            if obj["HashId"].v not in map_hashes:
-                old_hash: int = ctypes.c_int32(
-                    zlib.crc32(f"MainField_{obj['UnitConfigName']}_{obj['HashId'].v}".encode())
-                ).value
-                delete_hashes.add(old_hash)
-        print(f"Finished processing {map_unit.name} in {time.time() - map_start} seconds...")
+    if not resettypes[0] == -1:
+        for map_unit in moddir.rglob("**/*_*.smubin"):
+            map_start = time.time()
+            map_data = oead.byml.from_binary(bcmlutil.decompress(map_unit.read_bytes()))
+            map_section = map_unit.stem.split("_")
+            stock_map = mubin.get_stock_map((map_section[0], map_section[1]))
+            temp = generate_revival_flags_for_map(map_data, stock_map, "MainField", resettypes[0])
+            print(f"Finished processing {map_unit.name} in {time.time() - map_start} seconds...")
+            ignore_hashes |= temp["ignore"]
+            delete_hashes |= temp["delete"]
+    if not resettypes[1] == -1:
+        for map_pack in moddir.glob("content/Pack/Dungeon*.pack"):
+            pack_data = oead.Sarc(map_pack.read_bytes())
+            stock_pack = oead.Sarc(bcmlutil.get_game_file(map_pack).read_bytes())
+            map_types = ("_Static", "_Dynamic")
+            for map_type in map_types:
+                map_start = time.time()
+                map_name = f"{map_pack.stem}{map_type}.smubin"
+                map_data = oead.byml.from_binary(
+                    oead.yaz0.decompress(
+                        pack_data.get_file(f"Map/CDungeon/{map_pack.stem}/{map_name}").data
+                    )
+                )
+                stock_map = oead.byml.from_binary(
+                    oead.yaz0.decompress(
+                        stock_pack.get_file(f"Map/CDungeon/{map_pack.stem}/{map_name}").data
+                    )
+                )
+                temp = generate_revival_flags_for_map(
+                    map_data, stock_map, "CDungeon", resettypes[1]
+                )
+                print(f"Finished processing {map_name} in {time.time() - map_start} seconds...")
+                ignore_hashes |= temp["ignore"]
+                delete_hashes |= temp["delete"]
     for hash in delete_hashes:
         if hash not in ignore_hashes:
-            util.rem_flag_bgdict(old_hash, "revival_bool_data")
-            util.rem_flag_svdict(old_hash, "game_data.sav")
+            util.rem_flag_bgdict(hash, "revival_bool_data")
+            util.rem_flag_svdict(hash, "game_data.sav")
 
 
 def actor_bool_bgdata_flag(flag_type: str, actor_name: str, cat: int = -1) -> int:
@@ -267,11 +310,11 @@ def generate_item_flags(moddir: Path) -> None:
 
 def generate(args):
     directory: Path = Path(args.directory)
-    if not args.actor and not args.revival:
+    if not args.actor and not args.revival[0] == -1 and not args.revival[1] == -1:
         print("No flag options were chosen! Use -a and/or -r to generate flags.")
         exit()
 
     if args.revival:
-        generate_revival_flags(directory)
+        generate_revival_flags(directory, args.revival)
     if args.actor:
         generate_item_flags(directory)
