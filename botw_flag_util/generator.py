@@ -11,7 +11,23 @@ from bcml import util as bcmlutil
 from . import EXEC_DIR, gdata_file_prefixes, util
 
 
+current_map: str = ""
+
+
 def should_not_make_flag(obj) -> bool:
+    try:
+        if "LinkTag" in obj["UnitConfigName"]:
+            makeflag = obj["!Parameters"]["MakeSaveFlag"].v
+            if makeflag == 0 and not "SaveFlag" in obj["!Parameters"]:
+                return True
+            elif obj["!Parameters"]["IncrementSave"]:
+                return True  # revival flags are bools, IncrementSave means s32
+            else:
+                return False
+    except KeyError:
+        return True
+        # the unchecked keys above are mandatory so this shouldn't be necessary...
+
     try:
         # return not obj["!Parameters"]["MakeFlag"]
         return obj["!Parameters"]["NoFlag"]
@@ -19,11 +35,30 @@ def should_not_make_flag(obj) -> bool:
         return False
 
 
+def get_flag_name(obj, fieldname: str) -> str:
+    if "LinkTag" in obj["UnitConfigName"]:
+        makeflag = obj["!Parameters"]["MakeSaveFlag"].v
+        if makeflag == 0 and "SaveFlag" in obj["!Parameters"]:
+            return obj["!Parameters"]["SaveFlag"]
+            # should_not_make_flag() will stop cases where `not "SaveFlag" in obj["!Parameters"]`
+        elif makeflag == 1:
+            if not current_map:
+                raise ValueError(
+                    "A LinkTag was created with MakeSaveFlag 1 in MainField, this is not valid"
+                )
+            return f"Clear_{current_map}"
+        elif makeflag == 2:
+            raise ValueError(
+                "A LinkTag was created with MakeSaveFlag 2 but can't figure out nearest dungeon name"
+            )
+    return f"{fieldname}_{obj['UnitConfigName']}_{obj['HashId'].v}"
+
+
 def revival_bgdata_flag(new_obj, old_obj, fieldname: str, resettype: int = 1) -> None:
     old_hash: int = ctypes.c_int32(
         zlib.crc32(f"{fieldname}_{old_obj['UnitConfigName']}_{old_obj['HashId'].v}".encode())
     ).value
-    new_name: str = f"{fieldname}_{new_obj['UnitConfigName']}_{new_obj['HashId'].v}"
+    new_name: str = get_flag_name(new_obj, fieldname)
     new_hash: int = ctypes.c_int32(zlib.crc32(new_name.encode())).value
 
     if should_not_make_flag(new_obj):
@@ -94,14 +129,10 @@ def generate_revival_flags_for_map(
                 zlib.crc32(f"{fieldname}_{obj['UnitConfigName']}_{obj['HashId'].v}".encode())
             ).value
         )
-        if obj["HashId"].v not in stock_hashes and not any(
-            excl in obj["UnitConfigName"] for excl in ["Area", "Sphere", "LinkTag"]
-        ):
+        if obj["HashId"].v not in stock_hashes and not "Area" in obj["UnitConfigName"]:
             revival_bgdata_flag(obj, obj, fieldname, resettype)
             revival_svdata_flag(obj, obj, fieldname)
-        elif obj["HashId"].v in stock_hashes and not any(
-            excl in obj["UnitConfigName"] for excl in ["Area", "Sphere", "LinkTag"]
-        ):
+        elif obj["HashId"].v in stock_hashes and not "Area" in obj["UnitConfigName"]:
             stock_obj = stock_map["Objs"][stock_hashes.index(obj["HashId"].v)]
             name_changed = obj["UnitConfigName"] != stock_obj["UnitConfigName"]
             event_assoc_changed = bool("LinksToObj" in obj) != bool("LinksToObj" in stock_obj)
@@ -136,6 +167,7 @@ def generate_revival_flags(moddir: Path, resettypes: list) -> None:
             delete_hashes |= temp["delete"]
     if not resettypes[1] == -1:
         for map_pack in moddir.glob("content/Pack/Dungeon*.pack"):
+            current_map = map_pack.stem
             pack_data = oead.Sarc(map_pack.read_bytes())
             stock_pack = oead.Sarc(bcmlutil.get_game_file(map_pack).read_bytes())
             map_types = ("_Static", "_Dynamic")
@@ -158,6 +190,9 @@ def generate_revival_flags(moddir: Path, resettypes: list) -> None:
                 print(f"Finished processing {map_name} in {time.time() - map_start} seconds...")
                 ignore_hashes |= temp["ignore"]
                 delete_hashes |= temp["delete"]
+            current_map = ""
+            # ^ unnecessary given that it's updated every loop, but we rely on it possibly being
+            # empty for determining whether LinkTags are valid, so it's better to be safe
     for hash in delete_hashes:
         if hash not in ignore_hashes:
             util.rem_flag_bgdict(hash, "revival_bool_data")
