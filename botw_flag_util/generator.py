@@ -345,7 +345,7 @@ def generate_item_flags(moddir: Path) -> None:
 
 def generate(args):
     directory: Path = Path(args.directory)
-    if not args.actor and not args.revival[0] == -1 and not args.revival[1] == -1:
+    if not args.actor and args.revival[0] == -1 and args.revival[1] == -1:
         print("No flag options were chosen! Use -a and/or -r to generate flags.")
         exit()
 

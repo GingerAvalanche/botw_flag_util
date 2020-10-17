@@ -39,6 +39,7 @@ def main() -> None:
         default=[-1, -1],
         type=int,
         help="Generate revival flags for actor instances",
+        metavar=("MainFieldResetType", "ShrineResetType"),
     )
     g_parser.set_defaults(func=lambda a: generate(a))
 
