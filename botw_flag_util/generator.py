@@ -9,37 +9,42 @@ import oead
 from bcml.mergers import mubin
 from bcml import util as bcmlutil
 
-from . import EXEC_DIR, BGDATA_MAPPING, util
+from . import EXEC_DIR, BGDATA_MAPPING, util, vanilla_hash_dict, vanilla_actors
 from .flag import BoolFlag, S32Flag
 from .store import FlagStore
 
 
 current_map: str = ""
 bgdata: FlagStore = FlagStore()
+mod_actors_with_life: set = set()
 
 
 def should_not_make_flag(obj) -> bool:
-    try:
-        if "LinkTag" in obj["UnitConfigName"]:
-            makeflag = obj["!Parameters"]["MakeSaveFlag"].v
-            if makeflag == 0 and not "SaveFlag" in obj["!Parameters"]:
-                return True
-            elif makeflag == 1 or makeflag == 2:
-                return True
-            elif obj["!Parameters"]["IncrementSave"]:
-                return True  # revival flags are bools, IncrementSave means s32
-            else:
-                return False
-    except KeyError:
-        return True
-        # the unchecked keys above are mandatory so this shouldn't be necessary...
-        # EDIT: And it was necessary. Don't you just love people who don't follow conventions?
+    if "!Parameters" in obj:
+        if "ForceFlag" in obj["!Parameters"]:
+            return not obj["!Parameters"]["ForceFlag"]
 
-    try:
-        # return not obj["!Parameters"]["MakeFlag"]
-        return obj["!Parameters"]["NoFlag"]
-    except KeyError:
+    if "LinkTag" in obj["UnitConfigName"]:
+        makeflag = obj["!Parameters"]["MakeSaveFlag"].v
+        if makeflag == 0 and not "SaveFlag" in obj["!Parameters"]:
+            return True
+        elif makeflag == 1 or makeflag == 2:
+            return True
+        else:
+            return False
+
+    if "TBox" in obj["UnitConfigName"]:
+        if "EnableRevival" in obj["!Parameters"]:
+            return not obj["!Parameters"]["EnableRevival"]
+        else:
+            return False
+
+    if obj["UnitConfigName"] in mod_actors_with_life:
         return False
+
+    if obj["UnitConfigName"] in vanilla_actors["with_flags"]:
+        return False
+    return True
 
 
 def get_flag_name(obj, maptype: str) -> str:
@@ -50,7 +55,6 @@ def get_flag_name(obj, maptype: str) -> str:
             # should_not_make_flag() will stop cases where `not "SaveFlag" in obj["!Parameters"]`
         elif makeflag == 1:
             if not current_map:
-                return ""  # Temporary because my testing archives have these
                 raise ValueError(
                     "A LinkTag was created with MakeSaveFlag 1 in MainField, this is not valid"
                 )
@@ -63,7 +67,7 @@ def get_flag_name(obj, maptype: str) -> str:
     return f"{maptype}_{obj['UnitConfigName']}_{obj['HashId'].v}"
 
 
-def revival_flag(new_obj, old_obj, maptype: str, resettype: int = 1) -> None:
+def bool_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool = True) -> None:
     old_hash: int = ctypes.c_int32(zlib.crc32(get_flag_name(old_obj, maptype).encode())).value
     new_name: str = get_flag_name(new_obj, maptype)
     new_hash: int = ctypes.c_int32(zlib.crc32(new_name.encode())).value
@@ -75,7 +79,7 @@ def revival_flag(new_obj, old_obj, maptype: str, resettype: int = 1) -> None:
 
     flag = bgdata.find("bool_data", old_hash)
     old_exists = flag.exists()
-    flag = BoolFlag(revival=True) if not old_exists else flag
+    flag = BoolFlag(revival=revival) if not old_exists else flag
     flag.set_data_name(new_name)
     flag.set_event_assoc(bool("LinksToObj" in new_obj))
     flag.set_is_save(True)
@@ -92,6 +96,35 @@ def revival_flag(new_obj, old_obj, maptype: str, resettype: int = 1) -> None:
         bgdata.add("bool_data", flag)
 
 
+def s32_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool = True) -> None:
+    old_hash: int = ctypes.c_int32(zlib.crc32(get_flag_name(old_obj, maptype).encode())).value
+    new_name: str = get_flag_name(new_obj, maptype)
+    new_hash: int = ctypes.c_int32(zlib.crc32(new_name.encode())).value
+
+    if should_not_make_flag(new_obj):
+        bgdata.remove("s32_data", old_hash)
+        bgdata.remove("s32_data", new_hash)
+        return
+
+    flag = bgdata.find("s32_data", old_hash)
+    old_exists = flag.exists()
+    flag = S32Flag(revival=revival) if not old_exists else flag
+    flag.set_data_name(new_name)
+    flag.set_event_assoc(bool("LinksToObj" in new_obj))
+    flag.set_is_save(True)
+    flag.set_reset_type(resettype)
+
+    mod_flag = bgdata.find("s32_data", flag.get_hash())
+    if mod_flag.exists():
+        old_exists = True
+        old_hash = mod_flag.get_hash()
+
+    if old_exists:
+        bgdata.modify("s32_data", old_hash, flag)
+    else:
+        bgdata.add("s32_data", flag)
+
+
 def generate_revival_flags_for_map(
     map_data: oead.byml.Hash, stock_map: oead.byml.Hash, maptype: str, resettype: int
 ) -> dict:
@@ -105,14 +138,29 @@ def generate_revival_flags_for_map(
                 zlib.crc32(f"{maptype}_{obj['UnitConfigName']}_{obj['HashId'].v}".encode())
             ).value
         )
-        if obj["HashId"].v not in stock_hashes and not "Area" in obj["UnitConfigName"]:
-            revival_flag(obj, obj, maptype, resettype)
-        elif obj["HashId"].v in stock_hashes and not "Area" in obj["UnitConfigName"]:
+        revival = True
+        bflag = True
+        if "LinkTag" in obj["UnitConfigName"]:
+            revival = False
+            if not "!Parameters" in obj:
+                continue  # if it's a LinkTag with no !Parameters, fuck that developer
+            if "IncrementSave" in obj["!Parameters"]:
+                if obj["!Parameters"]["IncrementSave"]:
+                    bflag = False
+        if obj["HashId"].v not in stock_hashes:
+            if bflag:
+                bool_flag(obj, obj, maptype, resettype, revival)
+            else:
+                s32_flag(obj, obj, maptype, resettype, revival)
+        elif obj["HashId"].v in stock_hashes:
             stock_obj = stock_map["Objs"][stock_hashes.index(obj["HashId"].v)]
             name_changed = obj["UnitConfigName"] != stock_obj["UnitConfigName"]
             event_assoc_changed = bool("LinksToObj" in obj) != bool("LinksToObj" in stock_obj)
             if name_changed or event_assoc_changed:
-                revival_flag(obj, stock_obj, maptype, resettype)
+                if bflag:
+                    bool_flag(obj, stock_obj, maptype, resettype, revival)
+                else:
+                    s32_flag(obj, stock_obj, maptype, resettype, revival)
     for obj in stock_map["Objs"]:
         if obj["HashId"].v not in map_hashes:
             old_hash: int = ctypes.c_int32(
@@ -242,9 +290,7 @@ def generate_item_flags(moddir: Path) -> None:
         mod_s32.add(actor_s32_flag("EquipTime", str(weapon_actor.stem)))
         mod_s32.add(actor_s32_flag("PorchTime", str(weapon_actor.stem)))
 
-    f = EXEC_DIR / "data" / "vanilla_hash.json"
     vanilla_hashes: set = set()
-    vanilla_hash_dict = json.loads(f.read_text())
     for _, hash_list in vanilla_hash_dict.items():
         vanilla_hashes |= set(hash_list)
 
@@ -271,6 +317,19 @@ def generate(args):
         print("No flag options were chosen! Use -a and/or -r to generate flags.")
         exit()
 
+    if (directory / "content/Actor/ActorInfo.product.sbyml").exists():
+        actorinfo_bytes = (directory / "content/Actor/ActorInfo.product.sbyml").read_bytes()
+        actorinfo = oead.byml.from_binary(oead.yaz0.decompress(actorinfo_bytes))
+        for actor in actorinfo["Actors"]:
+            if (
+                not actor["name"] in vanilla_actors["with_flags"]
+                and not actor["name"] in vanilla_actors["no_flags"]
+                and "generalLife" in actor
+            ):
+                mod_actors_with_life.add(actor["name"])
+        del actorinfo_bytes
+        del actorinfo
+
     gamedata_sarc = util.get_gamedata_sarc(directory)
     for bgdata_name, bgdata_hash in map(util.unpack_oead_file, gamedata_sarc.get_files()):
         bgdata.add_flags_from_Hash(bgdata_name, bgdata_hash)
@@ -280,7 +339,6 @@ def generate(args):
     if args.actor:
         generate_item_flags(directory)
 
-    write_start = time.time()
     files_to_write: list = []
     files_to_write.append("GameData/gamedata.ssarc")
     files_to_write.append("GameData/savedataformat.ssarc")
@@ -297,10 +355,9 @@ def generate(args):
     bgdata_time = time.time() - bgdata_start
     print(f"Generating svdata took {bgdata_time} seconds...")
     util.inject_files_into_bootup(directory, files_to_write, datas_to_write)
-    write_time = time.time() - write_start
 
     if bgdata.get_total_changes() > 0:
-        print(f"Writing took {write_time} seconds...")
+        print()
         print(f"{bgdata.get_num_new()} New Game Data Entries")
         print(f"{bgdata.get_num_modified()} Modified Game Data Entries")
         print(f"{bgdata.get_num_deleted()} Deleted Game Data Entries")

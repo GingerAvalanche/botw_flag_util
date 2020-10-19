@@ -1,5 +1,8 @@
+import json
 import os
 from pathlib import Path
+
+EXEC_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
 
 BGDATA_MAPPING = {
     "bool_array_data": "bool_array_data",
@@ -22,4 +25,5 @@ BGDATA_MAPPING = {
     "vector4f_data": "vector4f_data",
 }
 
-EXEC_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
+vanilla_hash_dict = json.loads((EXEC_DIR / "data" / "vanilla_hash.json").read_text())
+vanilla_actors = json.loads((EXEC_DIR / "data" / "vanilla_actors.json").read_text())
