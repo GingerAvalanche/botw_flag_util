@@ -1,20 +1,32 @@
+from pathlib import Path
+
 from . import util
+from .flag import BFUFlag
+from .store import FlagStore
 
 
 def find(args):
+    directory: Path = Path(args.directory)
+    gamedata_sarc = util.get_gamedata_sarc(directory)
+    bgdata = FlagStore()
+    for bgdata_name, bgdata_hash in map(util.unpack_oead_file, gamedata_sarc.get_files()):
+        bgdata.add_flags_from_Hash(bgdata_name, bgdata_hash)
+
     search_name = args.flag_name
-    bg_todelete: dict = util.search_bgdict(search_name)
-    sv_todelete: dict = util.search_svdict(search_name)
-    numbgkeys: int = 0
-    numsvkeys: int = 0
-    for _, flagdata in bg_todelete.items():
-        numbgkeys += len(flagdata)
-    for _, flagdata in sv_todelete.items():
-        numsvkeys += len(flagdata)
+    found: dict = {}
+    numfound = 0
+    numsv = 0
+    for ftype in util.BGDATA_TYPES:
+        found[ftype] = bgdata.find_all(ftype, search_name)
+        numfound += len(found[ftype])
+    for _, flags in found.items():
+        for flag in flags:
+            if flag.is_save():
+                numsv += 1
 
     while True:
         print(
-            f"\n{numbgkeys} gamedata flags and {numsvkeys} savedata flags were found that matched {search_name}."
+            f"\n{numfound} gamedata flags and {numsv} savedata flags were found that matched {search_name}."
         )
         print("\nPlease choose an option:")
         print("v - View the full flag names, files, and indices in their files")
@@ -23,21 +35,32 @@ def find(args):
         selection = input("(v/d/x):")
 
         if selection == "v":
-            for prefix, flagdata in bg_todelete.items():
-                for hash in flagdata:
-                    print(f"{util.bgdict[prefix][hash]['DataName']} in {prefix}")
-            for file_name, flagdata in sv_todelete.items():
-                for hash in flagdata:
-                    print(f"{util.svdict[file_name][hash]['DataName']} in {file_name}")
+            for ftype, flags in found.items():
+                for flag in flags:
+                    if flag.is_save():
+                        string = f"{flag.get_name()} in {ftype} and in game_data.sav"
+                    else:
+                        string = f"{flag.get_name()} in {ftype}"
+                    print(string)
 
         elif selection == "d":
-            for prefix, flagdata in bg_todelete.items():
-                util.prep_entry_dicts_for_run(prefix)
-                for hash in flagdata:
-                    util.rem_flag_bgdict(hash, prefix)
-            for file_name, flagdata in sv_todelete.items():
-                for hash in flagdata:
-                    util.rem_flag_svdict(hash, file_name)
+            for ftype, flags in found.items():
+                for flag in flags:
+                    bgdata.remove(ftype, hash)
+            write_start = time.time()
+            files_to_write: list = []
+            files_to_write.append("GameData/gamedata.ssarc")
+            files_to_write.append("GameData/savedataformat.ssarc")
+            orig_files = util.get_last_two_savedata_files(directory)
+            datas_to_write: list = []
+            datas_to_write.append(
+                oead.yaz0.compress(util.make_new_gamedata(bgdata, args.bigendian))
+            )
+            datas_to_write.append(
+                oead.yaz0.compress(util.make_new_savedata(bgdata, args.bigendian, orig_files))
+            )
+            util.inject_files_into_bootup(bootup_path, files_to_write, datas_to_write)
+            write_time = time.time() - write_start
             return
 
         elif selection == "x":

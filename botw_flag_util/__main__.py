@@ -64,31 +64,4 @@ def main() -> None:
         shutil.copy(bcmlutil.get_game_file("Pack/Bootup.pack"), bootup_path)
     bootup_dir = str(bootup_path).replace("\\", "/")
 
-    util.make_bgdict(bootup_dir)
-    util.make_svdict(bootup_dir)
-
     args.func(args)
-
-    write_start = time.time()
-    files_to_write: list = []
-    files_to_write.append("GameData/gamedata.ssarc")
-    files_to_write.append("GameData/savedataformat.ssarc")
-    datas_to_write: list = []
-    datas_to_write.append(bcmlutil.compress(util.make_new_gamedata(args.bigendian)))
-    datas_to_write.append(bcmlutil.compress(util.make_new_savedata(args.bigendian)))
-    util.inject_files_into_bootup(bootup_path, files_to_write, datas_to_write)
-    write_time = time.time() - write_start
-
-    if util.get_total_changes() > 0:
-        print(f"\nFlag writing took {write_time} seconds...\n")
-        print(f"{util.get_new_bgdict_changes()} New Game Data Entries")
-        print(f"{util.get_mod_bgdict_changes()} Modified Game Data Entries")
-        print(f"{util.get_del_bgdict_changes()} Deleted Game Data Entries")
-        print(f"{util.get_new_svdict_changes()} New Save Data Entries")
-        print(f"{util.get_mod_svdict_changes()} Modified Save Data Entries")
-        print(f"{util.get_del_svdict_changes()} Deleted Save Data Entries")
-
-        if args.verbose:
-            print(util.get_verbose_output())
-    else:
-        print("No changes were made.")

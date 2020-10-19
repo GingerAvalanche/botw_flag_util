@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-gdata_file_prefixes = {
+BGDATA_MAPPING = {
     "bool_array_data": "bool_array_data",
     "bool_data": "bool_data",
     "f32_array_data": "f32_array_data",
