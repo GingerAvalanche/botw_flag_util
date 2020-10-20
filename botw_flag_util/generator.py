@@ -143,7 +143,11 @@ def location_flag(name: str) -> None:
     flag.set_max_value(2147483647)
     flag.set_min_value(-2147483648)
 
-    bgdata.add("s32_data", flag)
+    old_flag = bgdata.find("s32_data", flag.get_hash())
+    if old_flag.exists():
+        bgdata.modify("s32_data", old_flag.get_hash(), flag)
+    else:
+        bgdata.add("s32_data", flag)
 
 
 def misc_bool_flag(name: str) -> None:
@@ -152,7 +156,11 @@ def misc_bool_flag(name: str) -> None:
     flag.set_is_save(True)
     flag.set_is_one_trigger(True)
 
-    bgdata.add("bool_data", flag)
+    old_flag = bgdata.find("bool_data", flag.get_hash())
+    if old_flag.exists():
+        bgdata.modify("bool_data", old_flag.get_hash(), flag)
+    else:
+        bgdata.add("bool_data", flag)
 
 
 def generate_revival_flags_for_map(
@@ -233,6 +241,7 @@ def generate_revival_flags(resettypes: list) -> None:
                 f"Finished processing MainField/Static.smubin in {time.time() - map_start} seconds..."
             )
     if not resettypes[1] == -1:
+        global current_map
         for map_pack in moddir.rglob("Pack/Dungeon*.pack"):
             current_map = map_pack.stem
             pack_data = oead.Sarc(map_pack.read_bytes())
@@ -422,7 +431,11 @@ def generate(args):
         print(f"{bgdata.get_num_deleted_svdata()} Deleted Save Data Entries")
 
         if args.verbose:
-            (util.root_dir() / "flag_log.txt").touch()
-            (util.root_dir() / "flag_log.txt").write_text(util.get_verbose_output(bgdata))
+            flag_path = util.root_dir() / "flag_log.txt"
+            flag_path.touch()
+            flag_path.write_text(util.get_verbose_output(bgdata))
+            flag_dir = str(flag_path).replace("\\", "/")
+            print()
+            print(f"Log written to {flag_dir}")
     else:
         print("No changes were made.")
