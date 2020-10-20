@@ -15,6 +15,21 @@ from typing import List, Tuple
 from zlib import crc32
 
 
+IS_ONE_TRIGGER_NAMES = [
+    "Clear_",
+    "Open_",
+]
+RESET_TYPE_ZERO_NAMES = [
+    "Clear_",
+    "Open_",
+    "Location_",
+    "DgnObj_EntranceTerminal",
+]
+BOOL_CATEGORY_ONE_NAMES = [
+    "Clear_",
+]
+
+
 class BFUFlag:
     _data_name: str
     _delete_rev: int
@@ -133,6 +148,14 @@ class BFUFlag:
         """Gets whether or not the flag belongs in the revival files.
         Only valid for S32Flag and BoolFlag."""
 
+    def use_name_to_override_params(self) -> None:
+        for substr in IS_ONE_TRIGGER_NAMES:
+            if substr in self._data_name:
+                self._is_one_trigger = True
+        for substr in RESET_TYPE_ZERO_NAMES:
+            if substr in self._data_name:
+                self._reset_type = 0
+
 
 class BoolFlag(BFUFlag):
     _category: int
@@ -193,6 +216,12 @@ class BoolFlag(BFUFlag):
     def is_revival(self) -> bool:
         return self._revival
 
+    def use_name_to_override_params(self) -> None:
+        super(BoolFlag, self).use_name_to_override_params()
+        for substr in BOOL_CATEGORY_ONE_NAMES:
+            if substr in self._data_name:
+                self._category = 1
+
 
 class BoolArrayFlag(BFUFlag):
     _init_value: List[int]
@@ -249,6 +278,9 @@ class BoolArrayFlag(BFUFlag):
     def is_revival(self) -> bool:
         return False
 
+    def use_name_to_override_params(self) -> None:
+        super(BoolArrayFlag, self).use_name_to_override_params()
+
 
 class S32Flag(BFUFlag):
     _init_value: int
@@ -302,6 +334,9 @@ class S32Flag(BFUFlag):
 
     def is_revival(self) -> bool:
         return self._revival
+
+    def use_name_to_override_params(self) -> None:
+        super(S32Flag, self).use_name_to_override_params()
 
 
 class S32ArrayFlag(BFUFlag):
@@ -359,6 +394,9 @@ class S32ArrayFlag(BFUFlag):
     def is_revival(self) -> bool:
         return False
 
+    def use_name_to_override_params(self) -> None:
+        super(S32ArrayFlag, self).use_name_to_override_params()
+
 
 class F32Flag(BFUFlag):
     _init_value: float
@@ -410,6 +448,9 @@ class F32Flag(BFUFlag):
 
     def is_revival(self) -> bool:
         return False
+
+    def use_name_to_override_params(self) -> None:
+        super(F32Flag, self).use_name_to_override_params()
 
 
 class F32ArrayFlag(BFUFlag):
@@ -467,6 +508,9 @@ class F32ArrayFlag(BFUFlag):
     def is_revival(self) -> bool:
         return False
 
+    def use_name_to_override_params(self) -> None:
+        super(F32ArrayFlag, self).use_name_to_override_params()
+
 
 class StringFlag(BFUFlag):
     _init_value: str
@@ -515,6 +559,9 @@ class StringFlag(BFUFlag):
 
     def is_revival(self) -> bool:
         return False
+
+    def use_name_to_override_params(self) -> None:
+        super(StringFlag, self).use_name_to_override_params()
 
 
 class String32Flag(StringFlag):
@@ -609,6 +656,9 @@ class StringArrayFlag(BFUFlag):
 
     def is_revival(self) -> bool:
         return False
+
+    def use_name_to_override_params(self) -> None:
+        super(StringArrayFlag, self).use_name_to_override_params()
 
 
 class String64ArrayFlag(StringArrayFlag):
@@ -715,6 +765,9 @@ class Vec2Flag(BFUFlag):
     def is_revival(self) -> bool:
         return False
 
+    def use_name_to_override_params(self) -> None:
+        super(Vec2Flag, self).use_name_to_override_params()
+
 
 class Vec2ArrayFlag(BFUFlag):
     _init_value: List[Tuple[float, float]]
@@ -789,6 +842,9 @@ class Vec2ArrayFlag(BFUFlag):
 
     def is_revival(self) -> bool:
         return False
+
+    def use_name_to_override_params(self) -> None:
+        super(Vec2ArrayFlag, self).use_name_to_override_params()
 
 
 class Vec3Flag(BFUFlag):
@@ -871,6 +927,9 @@ class Vec3Flag(BFUFlag):
 
     def is_revival(self) -> bool:
         return False
+
+    def use_name_to_override_params(self) -> None:
+        super(Vec3Flag, self).use_name_to_override_params()
 
 
 class Vec3ArrayFlag(BFUFlag):
@@ -957,6 +1016,9 @@ class Vec3ArrayFlag(BFUFlag):
 
     def is_revival(self) -> bool:
         return False
+
+    def use_name_to_override_params(self) -> None:
+        super(Vec3ArrayFlag, self).use_name_to_override_params()
 
 
 class Vec4Flag(BFUFlag):
@@ -1045,3 +1107,6 @@ class Vec4Flag(BFUFlag):
 
     def is_revival(self) -> bool:
         return False
+
+    def use_name_to_override_params(self) -> None:
+        super(Vec4Flag, self).use_name_to_override_params()

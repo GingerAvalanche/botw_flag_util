@@ -24,6 +24,13 @@ from .store import FlagStore
 current_map: str = ""
 bgdata: FlagStore = FlagStore()
 mod_actors_with_life: set = set()
+GENERATOR_FLAG_NAME_EXCEPTIONS: list = [
+    "DgnMrgPrt",
+]
+LINKTAG_SAVEFLAG_EXCEPTIONS: list = [
+    "IsInside_Dungeon",
+    "MapTower_07_Demo",
+]
 
 
 def should_not_make_flag(obj) -> bool:
@@ -35,6 +42,9 @@ def should_not_make_flag(obj) -> bool:
         makeflag = obj["!Parameters"]["MakeSaveFlag"].v
         if makeflag == 0 and not "SaveFlag" in obj["!Parameters"]:
             return True
+        elif makeflag == 0:
+            if obj["!Parameters"]["SaveFlag"] in LINKTAG_SAVEFLAG_EXCEPTIONS:
+                return True
         else:
             return False
 
@@ -43,6 +53,10 @@ def should_not_make_flag(obj) -> bool:
             return not obj["!Parameters"]["EnableRevival"]
         else:
             return False
+
+    for substr in GENERATOR_FLAG_NAME_EXCEPTIONS:
+        if substr in obj["UnitConfigName"]:
+            return True
 
     if obj["UnitConfigName"] in mod_actors_with_life:
         return False
@@ -95,6 +109,8 @@ def bool_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool 
     flag.set_is_save(True)
     flag.set_reset_type(resettype)
 
+    flag.use_name_to_override_params()
+
     mod_flag = bgdata.find("bool_data", flag.get_hash())
     if mod_flag.exists():
         old_exists = True
@@ -124,6 +140,8 @@ def s32_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool =
     flag.set_is_save(True)
     flag.set_reset_type(resettype)
 
+    flag.use_name_to_override_params()
+
     mod_flag = bgdata.find("s32_data", flag.get_hash())
     if mod_flag.exists():
         old_exists = True
@@ -143,6 +161,8 @@ def location_flag(name: str) -> None:
     flag.set_max_value(2147483647)
     flag.set_min_value(-2147483648)
 
+    flag.use_name_to_override_params()
+
     old_flag = bgdata.find("s32_data", flag.get_hash())
     if old_flag.exists():
         bgdata.modify("s32_data", old_flag.get_hash(), flag)
@@ -155,6 +175,8 @@ def misc_bool_flag(name: str) -> None:
     flag.set_data_name(name)
     flag.set_is_save(True)
     flag.set_is_one_trigger(True)
+
+    flag.use_name_to_override_params()
 
     old_flag = bgdata.find("bool_data", flag.get_hash())
     if old_flag.exists():
@@ -295,6 +317,8 @@ def actor_bool_flag(flag_type: str, actor_name: str, cat: int = -1) -> int:
     if flag_type == "IsGet":
         flag.set_is_one_trigger(True)
 
+    flag.use_name_to_override_params()
+
     mod_flag = bgdata.find("bool_data", flag.get_hash())
     if mod_flag.exists():
         old_exists = True
@@ -319,6 +343,8 @@ def actor_s32_flag(flag_type: str, actor_name: str) -> int:
     flag.set_is_save(True)
     flag.set_max_value(2147483647)
     flag.set_min_value(0)
+
+    flag.use_name_to_override_params()
 
     mod_flag = bgdata.find("bool_data", flag.get_hash())
     if mod_flag.exists():

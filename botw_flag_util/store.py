@@ -41,6 +41,62 @@ FLAG_MAPPING = {
     "vector3f_array_data": Vec3ArrayFlag,
     "vector4f_data": Vec4Flag,
 }
+IGNORED_SAVE_FLAGS = [
+    "AlbumPictureIndex",
+    "IsGet_Obj_AmiiboItem",
+    "CaptionPictSize",
+    "SeakSensorPictureIndex",
+    "AoC_HardMode_Enabled",
+    "FamouseValue",
+    "SaveDistrictName",
+    "LastSaveTime_Lower",
+    "GameClear",
+    "IsChangedByDebug",
+    "SaveLocationName",
+    "IsSaveByAuto",
+    "LastSaveTime_Upper",
+    "IsLogicalDelete",
+    "GyroOnOff",
+    "PlayReport_CtrlMode_Ext",
+    "PlayReport_CtrlMode_Free",
+    "NexUniqueID_Upper",
+    "MiniMapDirection",
+    "CameraRLReverse",
+    "JumpButtonChange",
+    "TextRubyOnOff",
+    "VoiceLanguage",
+    "PlayReport_CtrlMode_Console_Free",
+    "PlayReport_PlayTime_Handheld",
+    "BalloonTextOnOff",
+    "PlayReport_AudioChannel_Other",
+    "PlayReport_AudioChannel_5_1ch",
+    "NexIsPosTrackUploadAvailableCache",
+    "NexsSaveDataUploadIntervalHoursCache",
+    "NexUniqueID_Lower",
+    "TrackBlockFileNumber",
+    "Option_LatestAoCVerPlayed",
+    "NexPosTrackUploadIntervalHoursCache",
+    "NexLastUploadTrackBlockHardIndex",
+    "MainScreenOnOff",
+    "PlayReport_AudioChannel_Stereo",
+    "NexIsSaveDataUploadAvailableCache",
+    "NexLastUploadSaveDataTime",
+    "PlayReport_AllPlayTime",
+    "NexLastUploadTrackBlockIndex",
+    "PlayReport_CtrlMode_Console_Ext",
+    "AmiiboItemOnOff",
+    "TrackBlockFileNumber_Hard",
+    "StickSensitivity",
+    "TextWindowChange",
+    "IsLastPlayHardMode",
+    "PlayReport_CtrlMode_Console_FullKey",
+    "NexLastUploadTrackBlockTime",
+    "PlayReport_CtrlMode_FullKey",
+    "PlayReport_PlayTime_Console",
+    "PlayReport_AudioChannel_Mono",
+    "CameraUpDownReverse",
+    "PlayReport_CtrlMode_Handheld",
+]
 
 
 class FlagStore:
@@ -201,5 +257,9 @@ class FlagStore:
     def flags_to_svdata_Array(self) -> Array:
         flag_list: list = []
         for _, flagdict in self._store.items():
-            flag_list += [flag.to_sv_Hash() for _, flag in flagdict.items() if flag.is_save()]
+            flag_list += [
+                flag.to_sv_Hash()
+                for _, flag in flagdict.items()
+                if flag.is_save() and not flag.get_name() in IGNORED_SAVE_FLAGS
+            ]
         return Array(sorted(flag_list, key=lambda f: f["HashValue"]))
