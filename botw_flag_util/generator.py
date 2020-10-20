@@ -412,7 +412,7 @@ def generate(args):
     print(f"Generating svdata took {bgdata_time} seconds...")
     util.inject_files_into_bootup(files_to_write, datas_to_write)
 
-    if bgdata.get_total_num_changes() > 0:
+    if bgdata.get_total_changes() > 0:
         print()
         print(f"{bgdata.get_num_new()} New Game Data Entries")
         print(f"{bgdata.get_num_modified()} Modified Game Data Entries")
@@ -422,7 +422,7 @@ def generate(args):
         print(f"{bgdata.get_num_deleted_svdata()} Deleted Save Data Entries")
 
         if args.verbose:
-            (util.root_dir() / "output.txt").touch()
-            (util.root_dir() / "output.txt").write_text(util.get_verbose_output(bgdata))
+            (util.root_dir() / "flag_log.txt").touch()
+            (util.root_dir() / "flag_log.txt").write_text(util.get_verbose_output(bgdata))
     else:
         print("No changes were made.")

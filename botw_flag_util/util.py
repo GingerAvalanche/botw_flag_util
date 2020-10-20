@@ -200,27 +200,27 @@ def unpack_oead_file(f: oead.File) -> tuple:
 
 
 def get_verbose_output(store: FlagStore) -> str:
-    r: list = ["\n"]
+    r: list = []
     for ftype in BGDATA_TYPES:
         r.append(f"For {ftype}:\n")
         r.append("  Game data entries:\n")
         r.append("    New flags:\n")
         for name in sorted(list(store.get_new_ftype(ftype))):
-            r.append(f"      {name}")
+            r.append(f"      {name}\n")
         r.append("    Modified flags:\n")
         for name in sorted(list(store.get_modified_ftype(ftype))):
-            r.append(f"      {name}")
+            r.append(f"      {name}\n")
         r.append("    Deleted flags:\n")
         for name in sorted(list(store.get_deleted_ftype(ftype))):
-            r.append(f"      {name}")
+            r.append(f"      {name}\n")
         r.append("  Save data entries:\n")
         r.append("    New flags:\n")
         for name in sorted(list(store.get_new_ftype_svdata(ftype))):
-            r.append(f"      {name}")
+            r.append(f"      {name}\n")
         r.append("    Modified flags:\n")
         for name in sorted(list(store.get_modified_ftype_svdata(ftype))):
-            r.append(f"      {name}")
+            r.append(f"      {name}\n")
         r.append("    Deleted flags:\n")
         for name in sorted(list(store.get_deleted_ftype_svdata(ftype))):
-            r.append(f"      {name}")
+            r.append(f"      {name}\n")
     return "".join(r)

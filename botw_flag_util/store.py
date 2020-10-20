@@ -98,9 +98,9 @@ class FlagStore:
 
     def add(self, ftype: str, flag: BFUFlag) -> bool:
         self._store[ftype][flag.get_hash()] = flag
-        self._new_bgdata[ftype].add(flag.get_hash())
+        self._new_bgdata[ftype].add(flag.get_name())
         if flag.is_save():
-            self._new_svdata[ftype].add(flag.get_hash())
+            self._new_svdata[ftype].add(flag.get_name())
         return True
 
     def modify(self, ftype: str, old_hash: int, new_flag: BFUFlag) -> bool:
@@ -110,28 +110,39 @@ class FlagStore:
             return False
         self._store[ftype].pop(old_hash)
         self._store[ftype][new_hash] = new_flag
-        self._modified_bgdata[ftype].add(new_hash)
+        self._modified_bgdata[ftype].add(new_flag.get_name())
         if new_flag.is_save():
-            self._modified_svdata[ftype].add(new_hash)
+            self._modified_svdata[ftype].add(new_flag.get_name())
         return True
 
     def remove(self, ftype: str, hash: int) -> bool:
         flag = self.find(ftype, hash)
         if flag.exists():
+            name = self._store[ftype][hash].get_name()
             self._store[ftype].pop(hash)
-            self._deleted_bgdata[ftype].add(hash)
+            self._deleted_bgdata[ftype].add(name)
             if flag.is_save():
-                self._deleted_svdata[ftype].add(hash)
+                self._deleted_svdata[ftype].add(name)
             return True
         return False
 
-    def get_total_num_changes(self) -> int:
-        changes: int = 0
-        for ftype in FLAG_MAPPING:
-            changes += len(self._new_bgdata[ftype])
-            changes += len(self._modified_bgdata[ftype])
-            changes += len(self._deleted_bgdata[ftype])
-        return changes
+    def get_num_new(self) -> int:
+        r = 0
+        for _, flags in self._new_bgdata.items():
+            r += len(flags)
+        return r
+
+    def get_num_modified(self) -> int:
+        r = 0
+        for _, flags in self._modified_bgdata.items():
+            r += len(flags)
+        return r
+
+    def get_num_deleted(self) -> int:
+        r = 0
+        for _, flags in self._deleted_bgdata.items():
+            r += len(flags)
+        return r
 
     def get_new_ftype(self, ftype: str) -> set:
         return self._new_bgdata[ftype]
@@ -141,6 +152,27 @@ class FlagStore:
 
     def get_deleted_ftype(self, ftype: str) -> set:
         return self._deleted_bgdata[ftype]
+
+    def get_total_changes(self) -> int:
+        return self.get_num_new() + self.get_num_modified() + self.get_num_deleted()
+
+    def get_num_new_svdata(self) -> int:
+        r = 0
+        for _, flags in self._new_svdata.items():
+            r += len(flags)
+        return r
+
+    def get_num_modified_svdata(self) -> int:
+        r = 0
+        for _, flags in self._modified_svdata.items():
+            r += len(flags)
+        return r
+
+    def get_num_deleted_svdata(self) -> int:
+        r = 0
+        for _, flags in self._deleted_svdata.items():
+            r += len(flags)
+        return r
 
     def get_new_ftype_svdata(self, ftype: str) -> set:
         return self._new_svdata[ftype]
