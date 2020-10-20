@@ -152,7 +152,7 @@ def misc_bool_flag(name: str) -> None:
     flag.set_is_save(True)
     flag.set_is_one_trigger(True)
 
-    bgdata.add("bool_flag", flag)
+    bgdata.add("bool_data", flag)
 
 
 def generate_revival_flags_for_map(
