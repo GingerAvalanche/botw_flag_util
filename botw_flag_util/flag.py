@@ -753,12 +753,13 @@ class Vec2ArrayFlag(BFUFlag):
         vec_array = Array()
         vec_array.append(Hash())
         vec_array[0]["Values"] = Array()
-        vec_array[0]["Values"].append(Array())
-        for vector in self._init_value:
+        for i in range(len(self._init_value)):
+            vector = self._init_value[i]
             vec = Array()
             vec.append(F32(vector[0]))
             vec.append(F32(vector[1]))
-            vec_array[0]["Values"][0].append(vec)
+            vec_array[0]["Values"].append(Array())
+            vec_array[0]["Values"][i].append(vec)
         r["InitValue"] = vec_array
         vec_array = Array()
         vec = Array()
@@ -917,13 +918,14 @@ class Vec3ArrayFlag(BFUFlag):
         vec_array = Array()
         vec_array.append(Hash())
         vec_array[0]["Values"] = Array()
-        vec_array[0]["Values"].append(Array())
-        for vector in self._init_value:
+        for i in range(len(self._init_value)):
+            vector = self._init_value[i]
             vec = Array()
             vec.append(F32(vector[0]))
             vec.append(F32(vector[1]))
             vec.append(F32(vector[2]))
-            vec_array[0]["Values"][0].append(vec)
+            vec_array[0]["Values"].append(Array())
+            vec_array[0]["Values"][i].append(vec)
         r["InitValue"] = vec_array
         vec_array = Array()
         vec = Array()

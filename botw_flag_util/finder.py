@@ -6,8 +6,8 @@ from .store import FlagStore
 
 
 def find(args):
-    directory: Path = Path(args.directory)
-    gamedata_sarc = util.get_gamedata_sarc(directory)
+    util.root_dir(args.directory)
+    gamedata_sarc = util.get_gamedata_sarc()
     bgdata = FlagStore()
     for bgdata_name, bgdata_hash in map(util.unpack_oead_file, gamedata_sarc.get_files()):
         bgdata.add_flags_from_Hash(bgdata_name, bgdata_hash)

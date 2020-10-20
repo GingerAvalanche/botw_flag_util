@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="botw_flag_util",
-    version="0.2.4",
+    version="0.2.5",
     author="Ginger",
     author_email="chodness@gmail.com",
     description="Game data and save game data flag utilities for LoZ:BotW",
