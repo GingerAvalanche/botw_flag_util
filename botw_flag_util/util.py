@@ -205,20 +205,22 @@ def get_verbose_output(store: FlagStore) -> str:
         r.append(f"For {ftype}:\n")
         r.append("  Game data entries:\n")
         r.append("    New flags:\n")
-        r.append(f"      {len(store.get_new_ftype(ftype))} flags were added to {ftype}\n")
+        for name in sorted(list(store.get_new_ftype(ftype))):
+            r.append(f"      {name}")
         r.append("    Modified flags:\n")
-        r.append(f"      {len(store.get_modified_ftype(ftype))} flags were modified in {ftype}\n")
+        for name in sorted(list(store.get_modified_ftype(ftype))):
+            r.append(f"      {name}")
         r.append("    Deleted flags:\n")
-        r.append(f"      {len(store.get_deleted_ftype(ftype))} flags were deleted from {ftype}\n")
+        for name in sorted(list(store.get_deleted_ftype(ftype))):
+            r.append(f"      {name}")
         r.append("  Save data entries:\n")
         r.append("    New flags:\n")
-        r.append(f"      {len(store.get_new_ftype_svdata(ftype))} flags were added to {ftype}\n")
+        for name in sorted(list(store.get_new_ftype_svdata(ftype))):
+            r.append(f"      {name}")
         r.append("    Modified flags:\n")
-        r.append(
-            f"      {len(store.get_modified_ftype_svdata(ftype))} flags were modified in {ftype}\n"
-        )
+        for name in sorted(list(store.get_modified_ftype_svdata(ftype))):
+            r.append(f"      {name}")
         r.append("    Deleted flags:\n")
-        r.append(
-            f"      {len(store.get_deleted_ftype_svdata(ftype))} flags were deleted from {ftype}\n"
-        )
+        for name in sorted(list(store.get_deleted_ftype_svdata(ftype))):
+            r.append(f"      {name}")
     return "".join(r)

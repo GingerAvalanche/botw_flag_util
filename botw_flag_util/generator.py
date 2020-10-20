@@ -222,10 +222,13 @@ def generate_revival_flags(resettypes: list) -> None:
                 f"Finished processing MainField/Static.smubin in {time.time() - map_start} seconds..."
             )
     if not resettypes[1] == -1:
-        for map_pack in moddir.glob("content/Pack/Dungeon*.pack"):
+        for map_pack in moddir.rglob("Pack/Dungeon*.pack"):
             current_map = map_pack.stem
             pack_data = oead.Sarc(map_pack.read_bytes())
-            stock_pack = oead.Sarc(bcmlutil.get_game_file(map_pack).read_bytes())
+            try:
+                stock_pack = oead.Sarc(bcmlutil.get_game_file(map_pack).read_bytes())
+            except FileNotFoundError:
+                stock_pack = None
             map_types = ("_Static", "_Dynamic")
             for map_type in map_types:
                 map_start = time.time()
@@ -235,11 +238,15 @@ def generate_revival_flags(resettypes: list) -> None:
                         pack_data.get_file(f"Map/CDungeon/{map_pack.stem}/{map_name}").data
                     )
                 )
-                stock_map = oead.byml.from_binary(
-                    oead.yaz0.decompress(
-                        stock_pack.get_file(f"Map/CDungeon/{map_pack.stem}/{map_name}").data
+                if stock_pack:
+                    stock_map = oead.byml.from_binary(
+                        oead.yaz0.decompress(
+                            stock_pack.get_file(f"Map/CDungeon/{map_pack.stem}/{map_name}").data
+                        )
                     )
-                )
+                else:
+                    stock_map = oead.byml.Hash()
+                    stock_map["Objs"] = oead.byml.Array()
                 temp = generate_revival_flags_for_map(
                     map_data, stock_map, "CDungeon", resettypes[1]
                 )
@@ -404,6 +411,7 @@ def generate(args):
         print(f"{bgdata.get_num_deleted_svdata()} Deleted Save Data Entries")
 
         if args.verbose:
-            print(util.get_verbose_output(bgdata))
+            (util.root_dir() / "output.txt").touch()
+            (util.root_dir() / "output.txt").write_text(util.get_verbose_output(bgdata))
     else:
         print("No changes were made.")
