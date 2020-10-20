@@ -125,6 +125,14 @@ class FlagStore:
             return True
         return False
 
+    def get_total_num_changes(self) -> int:
+        changes: int = 0
+        for ftype in FLAG_MAPPING:
+            changes += len(self._new_bgdata[ftype])
+            changes += len(self._modified_bgdata[ftype])
+            changes += len(self._deleted_bgdata[ftype])
+        return changes
+
     def get_new_ftype(self, ftype: str) -> set:
         return self._new_bgdata[ftype]
 

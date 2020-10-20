@@ -146,6 +146,15 @@ def location_flag(name: str) -> None:
     bgdata.add("s32_data", flag)
 
 
+def misc_bool_flag(name: str) -> None:
+    flag = BoolFlag()
+    flag.set_data_name(name)
+    flag.set_is_save(True)
+    flag.set_is_one_trigger(True)
+
+    bgdata.add("bool_flag", flag)
+
+
 def generate_revival_flags_for_map(
     map_data: oead.byml.Hash, stock_map: oead.byml.Hash, maptype: str, resettype: int
 ) -> dict:
@@ -218,6 +227,8 @@ def generate_revival_flags(resettypes: list) -> None:
                 if "MessageID" in marker:
                     if not marker["MessageID"] in vanilla_shrine_locs:
                         location_flag(marker["SaveFlag"])
+                        misc_bool_flag(f"Enter_{marker['MessageID']}")
+                        misc_bool_flag(f"CompleteTreasure_{marker['MessageID']}")
             print(
                 f"Finished processing MainField/Static.smubin in {time.time() - map_start} seconds..."
             )
@@ -401,7 +412,7 @@ def generate(args):
     print(f"Generating svdata took {bgdata_time} seconds...")
     util.inject_files_into_bootup(files_to_write, datas_to_write)
 
-    if bgdata.get_total_changes() > 0:
+    if bgdata.get_total_num_changes() > 0:
         print()
         print(f"{bgdata.get_num_new()} New Game Data Entries")
         print(f"{bgdata.get_num_modified()} Modified Game Data Entries")
