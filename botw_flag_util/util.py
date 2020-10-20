@@ -69,7 +69,7 @@ def get_shrine_locs() -> dict:
                     continue
                 if "MessageID" in marker:
                     if not marker["MessageID"] in vanilla_shrine_locs:
-                        shrine_locs[marker["MessageID"]] = convert_to_vec3f(marker["Location"])
+                        shrine_locs[marker["MessageID"]] = convert_to_vec3f(marker["Translate"])
         get_shrine_locs._shrine_locs = shrine_locs  # type:ignore[attr-defined]
     return get_shrine_locs._shrine_locs  # type:ignore[attr-defined]
 
