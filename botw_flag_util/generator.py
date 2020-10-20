@@ -9,7 +9,14 @@ import oead
 from bcml.mergers import mubin
 from bcml import util as bcmlutil
 
-from . import EXEC_DIR, BGDATA_MAPPING, util, vanilla_hash_dict, vanilla_actors
+from . import (
+    EXEC_DIR,
+    BGDATA_MAPPING,
+    util,
+    vanilla_hash_dict,
+    vanilla_actors,
+    vanilla_shrine_locs,
+)
 from .flag import BoolFlag, S32Flag
 from .store import FlagStore
 
@@ -27,8 +34,6 @@ def should_not_make_flag(obj) -> bool:
     if "LinkTag" in obj["UnitConfigName"]:
         makeflag = obj["!Parameters"]["MakeSaveFlag"].v
         if makeflag == 0 and not "SaveFlag" in obj["!Parameters"]:
-            return True
-        elif makeflag == 1 or makeflag == 2:
             return True
         else:
             return False
@@ -60,10 +65,15 @@ def get_flag_name(obj, maptype: str) -> str:
                 )
             return f"Clear_{current_map}"
         elif makeflag == 2:
-            return ""  # Temporary because my testing archives have these
-            raise ValueError(
-                "A LinkTag was created with MakeSaveFlag 2 but can't figure out nearest dungeon name"
-            )
+            if current_map:
+                raise ValueError(
+                    "A LinkTag was created with MakeSaveFlag 2 in CDungeon, this is not valid"
+                )
+            loc = oead.Vector3f()
+            loc.x = obj["Translate"][0].v
+            loc.y = obj["Translate"][1].v
+            loc.z = obj["Translate"][2].v
+            return f"Open_{util.get_nearest_shrine(loc)}"
     return f"{maptype}_{obj['UnitConfigName']}_{obj['HashId'].v}"
 
 
@@ -125,6 +135,17 @@ def s32_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool =
         bgdata.add("s32_data", flag)
 
 
+def location_flag(name: str) -> None:
+    flag = S32Flag()
+    flag.set_data_name(name)
+    flag.set_is_save(True)
+    flag.set_init_value(0)
+    flag.set_max_value(2147483647)
+    flag.set_min_value(-2147483648)
+
+    bgdata.add("s32_data", flag)
+
+
 def generate_revival_flags_for_map(
     map_data: oead.byml.Hash, stock_map: oead.byml.Hash, maptype: str, resettype: int
 ) -> dict:
@@ -171,20 +192,35 @@ def generate_revival_flags_for_map(
     return r
 
 
-def generate_revival_flags(moddir: Path, resettypes: list) -> None:
+def generate_revival_flags(resettypes: list) -> None:
+    moddir: Path = util.root_dir()
     ignore_hashes: set = set()
     delete_hashes: set = set()
 
     if not resettypes[0] == -1:
-        for map_unit in moddir.rglob("**/*_*.smubin"):
+        for map_unit in moddir.rglob("*_*.smubin"):
             map_start = time.time()
-            map_data = oead.byml.from_binary(bcmlutil.decompress(map_unit.read_bytes()))
+            map_data = oead.byml.from_binary(oead.yaz0.decompress(map_unit.read_bytes()))
             map_section = map_unit.stem.split("_")
             stock_map = mubin.get_stock_map((map_section[0], map_section[1]))
             temp = generate_revival_flags_for_map(map_data, stock_map, "MainField", resettypes[0])
             print(f"Finished processing {map_unit.name} in {time.time() - map_start} seconds...")
             ignore_hashes |= temp["ignore"]
             delete_hashes |= temp["delete"]
+        for static_unit in moddir.rglob("MainField/Static.smubin"):
+            map_start = time.time()
+            static_data = oead.byml.from_binary(oead.yaz0.decompress(static_unit.read_bytes()))
+            for marker in static_data["LocationMarker"]:
+                if not "Icon" in marker:
+                    continue
+                if not marker["Icon"] == "Dungeon":
+                    continue
+                if "MessageID" in marker:
+                    if not marker["MessageID"] in vanilla_shrine_locs:
+                        location_flag(marker["SaveFlag"])
+            print(
+                f"Finished processing MainField/Static.smubin in {time.time() - map_start} seconds..."
+            )
     if not resettypes[1] == -1:
         for map_pack in moddir.glob("content/Pack/Dungeon*.pack"):
             current_map = map_pack.stem
@@ -270,7 +306,8 @@ def actor_s32_flag(flag_type: str, actor_name: str) -> int:
     return flag.get_hash()
 
 
-def generate_item_flags(moddir: Path) -> None:
+def generate_item_flags() -> None:
+    moddir: Path = util.root_dir()
     mod_bool: set = set()
     mod_s32: set = set()
     for item_actor in moddir.rglob("**/Item_*.sbactorpack"):
@@ -312,13 +349,14 @@ def generate_item_flags(moddir: Path) -> None:
 
 
 def generate(args):
-    directory: Path = Path(args.directory)
     if not args.actor and args.revival[0] == -1 and args.revival[1] == -1:
         print("No flag options were chosen! Use -a and/or -r to generate flags.")
         exit()
 
-    if (directory / "content/Actor/ActorInfo.product.sbyml").exists():
-        actorinfo_bytes = (directory / "content/Actor/ActorInfo.product.sbyml").read_bytes()
+    util.root_dir(args.directory)
+    actorinfo_path = util.root_dir() / "content/Actor/ActorInfo.product.sbyml"
+    if actorinfo_path.exists():
+        actorinfo_bytes = actorinfo_path.read_bytes()
         actorinfo = oead.byml.from_binary(oead.yaz0.decompress(actorinfo_bytes))
         for actor in actorinfo["Actors"]:
             if (
@@ -330,19 +368,19 @@ def generate(args):
         del actorinfo_bytes
         del actorinfo
 
-    gamedata_sarc = util.get_gamedata_sarc(directory)
+    gamedata_sarc = util.get_gamedata_sarc()
     for bgdata_name, bgdata_hash in map(util.unpack_oead_file, gamedata_sarc.get_files()):
         bgdata.add_flags_from_Hash(bgdata_name, bgdata_hash)
 
     if args.revival:
-        generate_revival_flags(directory, args.revival)
+        generate_revival_flags(args.revival)
     if args.actor:
-        generate_item_flags(directory)
+        generate_item_flags()
 
     files_to_write: list = []
     files_to_write.append("GameData/gamedata.ssarc")
     files_to_write.append("GameData/savedataformat.ssarc")
-    orig_files = util.get_last_two_savedata_files(directory)
+    orig_files = util.get_last_two_savedata_files()
     datas_to_write: list = []
     bgdata_start = time.time()
     datas_to_write.append(oead.yaz0.compress(util.make_new_gamedata(bgdata, args.bigendian)))
@@ -354,7 +392,7 @@ def generate(args):
     )
     bgdata_time = time.time() - bgdata_start
     print(f"Generating svdata took {bgdata_time} seconds...")
-    util.inject_files_into_bootup(directory, files_to_write, datas_to_write)
+    util.inject_files_into_bootup(files_to_write, datas_to_write)
 
     if bgdata.get_total_changes() > 0:
         print()

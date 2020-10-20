@@ -25,5 +25,6 @@ BGDATA_MAPPING = {
     "vector4f_data": "vector4f_data",
 }
 
-vanilla_hash_dict = json.loads((EXEC_DIR / "data" / "vanilla_hash.json").read_text())
-vanilla_actors = json.loads((EXEC_DIR / "data" / "vanilla_actors.json").read_text())
+vanilla_hash_dict = json.loads((EXEC_DIR / "data/vanilla_hash.json").read_text())
+vanilla_actors = json.loads((EXEC_DIR / "data/vanilla_actors.json").read_text())
+vanilla_shrine_locs = json.loads((EXEC_DIR / "data/vanilla_shrines.json").read_text())

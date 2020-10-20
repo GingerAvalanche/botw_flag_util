@@ -1,11 +1,11 @@
-from math import ceil
+from math import ceil, sqrt
 from pathlib import Path
 from typing import Union
 from time import time
 
 import oead
 from bcml import util as bcmlutil
-from . import BGDATA_MAPPING
+from . import BGDATA_MAPPING, vanilla_shrine_locs
 from .store import FlagStore
 
 
@@ -29,8 +29,65 @@ BGDATA_TYPES = [
 ]
 
 
-def get_gamedata_sarc(directory: Path) -> oead.Sarc:
-    bootup_path: Path = directory / "content" / "Pack" / "Bootup.pack"
+def root_dir(dir: str = "") -> Path:
+    if not dir == "":
+        root_dir._root_dir = dir  # type:ignore[attr-defined]
+    if not hasattr(root_dir, "_root_dir"):
+        raise RuntimeError("Root directory was never set.")
+    return Path(root_dir._root_dir)  # type:ignore[attr-defined]
+
+
+def convert_to_vec3f(hash: Union[dict, oead.byml.Hash]) -> oead.Vector3f:
+    vec = oead.Vector3f()
+    if type(hash) == dict:
+        vec.x = hash["X"]
+        vec.y = hash["Y"]
+        vec.z = hash["Z"]
+    elif type(hash) == oead.byml.Hash:
+        vec.x = hash["X"].v
+        vec.y = hash["Y"].v
+        vec.z = hash["Z"].v
+    return vec
+
+
+def get_vector_distance(vec1: oead.Vector3f, vec2: oead.Vector3f) -> float:
+    return sqrt((vec1.x - vec2.x) ** 2 + (vec1.y - vec2.y) ** 2 + (vec1.z - vec2.z) ** 2)
+
+
+def get_shrine_locs() -> dict:
+    if not hasattr(get_shrine_locs, "_shrine_locs"):
+        shrine_locs = {
+            shrine: convert_to_vec3f(loc) for shrine, loc in vanilla_shrine_locs.items()
+        }
+        static_path = root_dir() / "aoc/0010/Map/MainField/Static.smubin"
+        if static_path.exists():
+            static = oead.byml.from_binary(oead.yaz0.decompress(static_path.read_bytes()))
+            for marker in static["LocationMarker"]:
+                if not "Icon" in marker:
+                    continue
+                if not marker["Icon"] == "Dungeon":
+                    continue
+                if "MessageID" in marker:
+                    if not marker["MessageID"] in vanilla_shrine_locs:
+                        shrine_locs[marker["MessageID"]] = convert_to_vec3f(marker["Location"])
+        get_shrine_locs._shrine_locs = shrine_locs  # type:ignore[attr-defined]
+    return get_shrine_locs._shrine_locs  # type:ignore[attr-defined]
+
+
+def get_nearest_shrine(vec: oead.Vector3f) -> str:
+    shrine_locs = get_shrine_locs()
+    smallest_distance: float = 10000000.0
+    nearest_shrine: str = ""
+    for name, loc in shrine_locs.items():
+        shrine_distance = get_vector_distance(vec, loc)
+        if shrine_distance < smallest_distance:
+            nearest_shrine = name
+            smallest_distance = shrine_distance
+    return nearest_shrine
+
+
+def get_gamedata_sarc() -> oead.Sarc:
+    bootup_path: Path = root_dir() / "content" / "Pack" / "Bootup.pack"
     bootup_sarc = oead.Sarc(bootup_path.read_bytes())
     gamedata_sarc = oead.Sarc(
         oead.yaz0.decompress(bootup_sarc.get_file("GameData/gamedata.ssarc").data)
@@ -38,8 +95,8 @@ def get_gamedata_sarc(directory: Path) -> oead.Sarc:
     return gamedata_sarc
 
 
-def get_last_two_savedata_files(directory: Path) -> list:
-    bootup_path: Path = directory / "content" / "Pack" / "Bootup.pack"
+def get_last_two_savedata_files() -> list:
+    bootup_path: Path = root_dir() / "content" / "Pack" / "Bootup.pack"
     bootup_sarc = oead.Sarc(bootup_path.read_bytes())
     savedata_sarc = oead.Sarc(
         oead.yaz0.decompress(bootup_sarc.get_file("GameData/savedataformat.ssarc").data)
@@ -118,8 +175,8 @@ def make_new_savedata(store: FlagStore, big_endian: bool, orig_files: list) -> b
     return svwriter.write()[1]
 
 
-def inject_files_into_bootup(directory: Path, files: list, datas: list):
-    bootup_path: Path = directory / "content" / "Pack" / "Bootup.pack"
+def inject_files_into_bootup(files: list, datas: list):
+    bootup_path: Path = root_dir() / "content" / "Pack" / "Bootup.pack"
     sarc_data = bootup_path.read_bytes()
     yaz = sarc_data[0:4] == b"Yaz0"
     if yaz:
