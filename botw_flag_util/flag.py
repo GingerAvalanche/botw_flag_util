@@ -137,10 +137,24 @@ class BFUFlag:
 
     def use_name_to_override_params(self) -> None:
         OVERRIDES = overrides["STANDARD_OVERRIDES"]
-        for override in OVERRIDES:
-            for substr, value in override.items():
-                if substr in self._data_name:
-                    self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_IS_EVENT_ASSOCIATED"].items():
+            if substr in self._data_name:
+                self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_IS_ONE_TRIGGER"].items():
+            if substr in self._data_name:
+                self._is_one_trigger = value
+        for substr, value in OVERRIDES["OVERRIDE_IS_PROGRAM_READABLE"].items():
+            if substr in self._data_name:
+                self._is_program_readable = value
+        for substr, value in OVERRIDES["OVERRIDE_IS_PROGRAM_WRITABLE"].items():
+            if substr in self._data_name:
+                self._is_program_writable = value
+        for substr, value in OVERRIDES["OVERRIDE_IS_SAVE"].items():
+            if substr in self._data_name:
+                self._is_save = value
+        for substr, value in OVERRIDES["OVERRIDE_RESET_TYPE"].items():
+            if substr in self._data_name:
+                self._reset_type = value
 
 
 class BoolFlag(BFUFlag):
@@ -205,10 +219,12 @@ class BoolFlag(BFUFlag):
     def use_name_to_override_params(self) -> None:
         super(BoolFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["BOOL_OVERRIDES"]
-        for override in OVERRIDES:
-            for substr, value in override.items():
-                if substr in self._data_name:
-                    self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_BOOL_CATEGORY"].items():
+            if substr in self._data_name:
+                self._category = value
+        for substr, value in OVERRIDES["OVERRIDE_BOOL_INIT_VALUE"].items():
+            if substr in self._data_name:
+                self._init_value = value
 
 
 class BoolArrayFlag(BFUFlag):
@@ -269,10 +285,15 @@ class BoolArrayFlag(BFUFlag):
     def use_name_to_override_params(self) -> None:
         super(BoolArrayFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["BOOL_ARRAY_OVERRIDES"]
-        for override in OVERRIDES:
-            for substr, value in override.items():
-                if substr in self._data_name:
-                    self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_BOOL_ARRAY_INIT_VALUE"].items():
+            if substr in self._data_name:
+                self._init_value = value
+        for substr, value in OVERRIDES["OVERRIDE_BOOL_ARRAY_MAX_VALUE"].items():
+            if substr in self._data_name:
+                self._max_value = value
+        for substr, value in OVERRIDES["OVERRIDE_BOOL_ARRAY_MIN_VALUE"].items():
+            if substr in self._data_name:
+                self._min_value = value
 
 
 class S32Flag(BFUFlag):
@@ -331,10 +352,15 @@ class S32Flag(BFUFlag):
     def use_name_to_override_params(self) -> None:
         super(S32Flag, self).use_name_to_override_params()
         OVERRIDES = overrides["S32_OVERRRIDES"]
-        for override in OVERRIDES:
-            for substr, value in override.items():
-                if substr in self._data_name:
-                    self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_S32_INIT_VALUE"].items():
+            if substr in self._data_name:
+                self._init_value = value
+        for substr, value in OVERRIDES["OVERRIDE_S32_MAX_VALUE"].items():
+            if substr in self._data_name:
+                self._max_value = value
+        for substr, value in OVERRIDES["OVERRIDE_S32_MIN_VALUE"].items():
+            if substr in self._data_name:
+                self._min_value = value
 
 
 class S32ArrayFlag(BFUFlag):
@@ -395,10 +421,15 @@ class S32ArrayFlag(BFUFlag):
     def use_name_to_override_params(self) -> None:
         super(S32ArrayFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["S32_ARRAY_OVERRIDES"]
-        for override in OVERRIDES:
-            for substr, value in override.items():
-                if substr in self._data_name:
-                    self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_S32_ARRAY_INIT_VALUE"].items():
+            if substr in self._data_name:
+                self._init_value = value
+        for substr, value in OVERRIDES["OVERRIDE_S32_ARRAY_MAX_VALUE"].items():
+            if substr in self._data_name:
+                self._max_value = value
+        for substr, value in OVERRIDES["OVERRIDE_S32_ARRAY_MIN_VALUE"].items():
+            if substr in self._data_name:
+                self._min_value = value
 
 
 class F32Flag(BFUFlag):
@@ -455,10 +486,15 @@ class F32Flag(BFUFlag):
     def use_name_to_override_params(self) -> None:
         super(F32Flag, self).use_name_to_override_params()
         OVERRIDES = overrides["F32_OVERRIDES"]
-        for override in OVERRIDES:
-            for substr, value in override.items():
-                if substr in self._data_name:
-                    self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_F32_INIT_VALUE"].items():
+            if substr in self._data_name:
+                self._init_value = value
+        for substr, value in OVERRIDES["OVERRIDE_F32_MAX_VALUE"].items():
+            if substr in self._data_name:
+                self._max_value = value
+        for substr, value in OVERRIDES["OVERRIDE_F32_MIN_VALUE"].items():
+            if substr in self._data_name:
+                self._min_value = value
 
 
 class F32ArrayFlag(BFUFlag):
@@ -519,10 +555,15 @@ class F32ArrayFlag(BFUFlag):
     def use_name_to_override_params(self) -> None:
         super(F32ArrayFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["F32_ARRAY_OVERRIDES"]
-        for override in OVERRIDES:
-            for substr, value in override.items():
-                if substr in self._data_name:
-                    self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_F32_ARRAY_INIT_VALUE"].items():
+            if substr in self._data_name:
+                self._init_value = value
+        for substr, value in OVERRIDES["OVERRIDE_F32_ARRAY_MAX_VALUE"].items():
+            if substr in self._data_name:
+                self._max_value = value
+        for substr, value in OVERRIDES["OVERRIDE_F32_ARRAY_MIN_VALUE"].items():
+            if substr in self._data_name:
+                self._min_value = value
 
 
 class StringFlag(BFUFlag):
@@ -576,10 +617,15 @@ class StringFlag(BFUFlag):
     def use_name_to_override_params(self) -> None:
         super(StringFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["STRING_OVERRIDES"]
-        for override in OVERRIDES:
-            for substr, value in override.items():
-                if substr in self._data_name:
-                    self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_STRING_INIT_VALUE"].items():
+            if substr in self._data_name:
+                self._init_value = value
+        for substr, value in OVERRIDES["OVERRIDE_STRING_MAX_VALUE"].items():
+            if substr in self._data_name:
+                self._max_value = value
+        for substr, value in OVERRIDES["OVERRIDE_STRING_MIN_VALUE"].items():
+            if substr in self._data_name:
+                self._min_value = value
 
 
 class String32Flag(StringFlag):
@@ -678,10 +724,15 @@ class StringArrayFlag(BFUFlag):
     def use_name_to_override_params(self) -> None:
         super(StringArrayFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["STRING_ARRAY_OVERRIDES"]
-        for override in OVERRIDES:
-            for substr, value in override.items():
-                if substr in self._data_name:
-                    self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_STRING_ARRAY_INIT_VALUE"].items():
+            if substr in self._data_name:
+                self._init_value = value
+        for substr, value in OVERRIDES["OVERRIDE_STRING_ARRAY_MAX_VALUE"].items():
+            if substr in self._data_name:
+                self._max_value = value
+        for substr, value in OVERRIDES["OVERRIDE_STRING_ARRAY_MIN_VALUE"].items():
+            if substr in self._data_name:
+                self._min_value = value
 
 
 class String64ArrayFlag(StringArrayFlag):
@@ -791,10 +842,15 @@ class Vec2Flag(BFUFlag):
     def use_name_to_override_params(self) -> None:
         super(Vec2Flag, self).use_name_to_override_params()
         OVERRIDES = overrides["VEC2_OVERRIDES"]
-        for override in OVERRIDES:
-            for substr, value in override.items():
-                if substr in self._data_name:
-                    self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC2_INIT_VALUE"].items():
+            if substr in self._data_name:
+                self._init_value = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC2_MAX_VALUE"].items():
+            if substr in self._data_name:
+                self._max_value = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC2_MIN_VALUE"].items():
+            if substr in self._data_name:
+                self._min_value = value
 
 
 class Vec2ArrayFlag(BFUFlag):
@@ -874,10 +930,15 @@ class Vec2ArrayFlag(BFUFlag):
     def use_name_to_override_params(self) -> None:
         super(Vec2ArrayFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["VEC2_ARRAY_OVERRIDES"]
-        for override in OVERRIDES:
-            for substr, value in override.items():
-                if substr in self._data_name:
-                    self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC2_ARRAY_INIT_VALUE"].items():
+            if substr in self._data_name:
+                self._init_value = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC2_ARRAY_MAX_VALUE"].items():
+            if substr in self._data_name:
+                self._max_value = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC2_ARRAY_MIN_VALUE"].items():
+            if substr in self._data_name:
+                self._min_value = value
 
 
 class Vec3Flag(BFUFlag):
@@ -964,10 +1025,15 @@ class Vec3Flag(BFUFlag):
     def use_name_to_override_params(self) -> None:
         super(Vec3Flag, self).use_name_to_override_params()
         OVERRIDES = overrides["VEC3_OVERRIDES"]
-        for override in OVERRIDES:
-            for substr, value in override.items():
-                if substr in self._data_name:
-                    self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC3_INIT_VALUE"].items():
+            if substr in self._data_name:
+                self._init_value = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC3_MAX_VALUE"].items():
+            if substr in self._data_name:
+                self._max_value = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC3_MIN_VALUE"].items():
+            if substr in self._data_name:
+                self._min_value = value
 
 
 class Vec3ArrayFlag(BFUFlag):
@@ -1058,10 +1124,15 @@ class Vec3ArrayFlag(BFUFlag):
     def use_name_to_override_params(self) -> None:
         super(Vec3ArrayFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["VEC3_ARRAY_OVERRIDES"]
-        for override in OVERRIDES:
-            for substr, value in override.items():
-                if substr in self._data_name:
-                    self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC3_ARRAY_INIT_VALUE"].items():
+            if substr in self._data_name:
+                self._init_value = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC3_ARRAY_MAX_VALUE"].items():
+            if substr in self._data_name:
+                self._max_value = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC3_ARRAY_MIN_VALUE"].items():
+            if substr in self._data_name:
+                self._min_value = value
 
 
 class Vec4Flag(BFUFlag):
@@ -1154,8 +1225,13 @@ class Vec4Flag(BFUFlag):
     def use_name_to_override_params(self) -> None:
         super(Vec4Flag, self).use_name_to_override_params()
         OVERRIDES = overrides["VEC4_OVERRIDES"]
-        for override in OVERRIDES:
-            for substr, value in override.items():
-                if substr in self._data_name:
-                    self._is_event_associated = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC4_INIT_VALUE"].items():
+            if substr in self._data_name:
+                self._init_value = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC4_MAX_VALUE"].items():
+            if substr in self._data_name:
+                self._max_value = value
+        for substr, value in OVERRIDES["OVERRIDE_VEC4_MIN_VALUE"].items():
+            if substr in self._data_name:
+                self._min_value = value
 
