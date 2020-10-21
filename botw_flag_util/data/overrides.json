@@ -1,0 +1,105 @@
+{
+    "STANDARD_OVERRIDES": {
+        "OVERRIDE_IS_EVENT_ASSOCIATED": {
+            "IsInside_Dungeon": true,
+            "MapTower_07_Demo": false
+        },
+        "OVERRIDE_IS_ONE_TRIGGER": {
+            "Clear_": true,
+            "CompleteTreasure_": true,
+            "Enter_": true,
+            "IsGet_": true,
+            "Open_": true
+        },
+        "OVERRIDE_IS_PROGRAM_READABLE": {},
+        "OVERRIDE_IS_PROGRAM_WRITABLE": {
+            "MapTower_07_Demo": false
+        },
+        "OVERRIDE_IS_SAVE": {
+            "CompleteTreasure_": true,
+            "Enter_": true,
+            "EquipTime_": true,
+            "IsGet_": true,
+            "IsInside_Dungeon": false,
+            "IsNewPictureBook_": true,
+            "IsRegisteredPictureBook_": true,
+            "Location_": true,
+            "PictureBookSize_": true,
+            "PorchTime_": true
+        },
+        "OVERRIDE_RESET_TYPES": {
+            "Clear_": 0,
+            "Open_": 0,
+            "Location_": 0,
+            "DgnObj_EntranceTerminal": 0,
+            "IsInside_Dungeon": 0,
+            "MapTower_07_Demo": 0
+        }
+    },
+    "BOOL_OVERRIDES": {
+        "OVERRIDE_BOOL_CATEGORIES": {
+            "Clear_": 1
+        },
+        "OVERRIDE_BOOL_INIT_VALUES": {}
+    },
+    "BOOL_ARRAY_OVERRIDES": {
+        "OVERRIDE_BOOL_ARRAY_INIT_VALUES": {},
+        "OVERRIDE_BOOL_ARRAY_MAX_VALUES": {},
+        "OVERRIDE_BOOL_ARRAY_MIN_VALUES": {}
+    },
+    "S32_OVERRRIDES": {
+        "OVERRIDE_S32_INIT_VALUES": {},
+        "OVERRIDE_S32_MAX_VALUES": {},
+        "OVERRIDE_S32_MIN_VALUES": {}
+    },
+    "S32_ARRAY_OVERRIDES": {
+        "OVERRIDE_S32_ARRAY_INIT_VALUES": {},
+        "OVERRIDE_S32_ARRAY_MAX_VALUES": {},
+        "OVERRIDE_S32_ARRAY_MIN_VALUES": {}
+    },
+    "F32_OVERRIDES": {
+        "OVERRIDE_F32_INIT_VALUES": {},
+        "OVERRIDE_F32_MAX_VALUES": {},
+        "OVERRIDE_F32_MIN_VALUES": {}
+    },
+    "F32_ARRAY_OVERRIDES": {
+        "OVERRIDE_F32_ARRAY_INIT_VALUES": {},
+        "OVERRIDE_F32_ARRAY_MAX_VALUES": {},
+        "OVERRIDE_F32_ARRAY_MIN_VALUES": {}
+    },
+    "STRING_OVERRIDES": {
+        "OVERRIDE_STRING_INIT_VALUES": {},
+        "OVERRIDE_STRING_MAX_VALUES": {},
+        "OVERRIDE_STRING_MIN_VALUES": {}
+    },
+    "STRING_ARRAY_OVERRIDES": {
+        "OVERRIDE_STRING_ARRAY_INIT_VALUES": {},
+        "OVERRIDE_STRING_ARRAY_MAX_VALUES": {},
+        "OVERRIDE_STRING_ARRAY_MIN_VALUES": {}
+    },
+    "VEC2_OVERRIDES": {
+        "OVERRIDE_VEC2_INIT_VALUES": {},
+        "OVERRIDE_VEC2_MAX_VALUES": {},
+        "OVERRIDE_VEC2_MIN_VALUES": {}
+    },
+    "VEC2_ARRAY_OVERRIDES": {
+        "OVERRIDE_VEC2_ARRAY_INIT_VALUES": {},
+        "OVERRIDE_VEC2_ARRAY_MAX_VALUES": {},
+        "OVERRIDE_VEC2_ARRAY_MIN_VALUES": {}
+    },
+    "VEC3_OVERRIDES": {
+        "OVERRIDE_VEC3_INIT_VALUES": {},
+        "OVERRIDE_VEC3_MAX_VALUES": {},
+        "OVERRIDE_VEC3_MIN_VALUES": {}
+    },
+    "VEC3_ARRAY_OVERRIDES": {
+        "OVERRIDE_VEC3_ARRAY_INIT_VALUES": {},
+        "OVERRIDE_VEC3_ARRAY_MAX_VALUES": {},
+        "OVERRIDE_VEC3_ARRAY_MIN_VALUES": {}
+    },
+    "VEC4_OVERRIDES": {
+        "OVERRIDE_VEC4_INIT_VALUES": {},
+        "OVERRIDE_VEC4_MAX_VALUES": {},
+        "OVERRIDE_VEC4_MIN_VALUES": {}
+    }
+}

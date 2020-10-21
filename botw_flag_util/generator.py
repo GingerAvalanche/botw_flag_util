@@ -27,10 +27,7 @@ mod_actors_with_life: set = set()
 GENERATOR_FLAG_NAME_EXCEPTIONS: list = [
     "DgnMrgPrt",
 ]
-LINKTAG_SAVEFLAG_EXCEPTIONS: list = [
-    "IsInside_Dungeon",
-    "MapTower_07_Demo",
-]
+LINKTAG_SAVEFLAG_EXCEPTIONS: list = []
 
 
 def should_not_make_flag(obj) -> bool:
@@ -156,7 +153,6 @@ def s32_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool =
 def location_flag(name: str) -> None:
     flag = S32Flag()
     flag.set_data_name(name)
-    flag.set_is_save(True)
     flag.set_init_value(0)
     flag.set_max_value(2147483647)
     flag.set_min_value(-2147483648)
@@ -173,8 +169,6 @@ def location_flag(name: str) -> None:
 def misc_bool_flag(name: str) -> None:
     flag = BoolFlag()
     flag.set_data_name(name)
-    flag.set_is_save(True)
-    flag.set_is_one_trigger(True)
 
     flag.use_name_to_override_params()
 
@@ -311,11 +305,8 @@ def actor_bool_flag(flag_type: str, actor_name: str, cat: int = -1) -> int:
     old_exists = flag.exists()
     flag = BoolFlag() if not old_exists else flag
     flag.set_data_name(flag_name)
-    flag.set_is_save(True)
     if not cat == -1:
         flag.set_category(cat)
-    if flag_type == "IsGet":
-        flag.set_is_one_trigger(True)
 
     flag.use_name_to_override_params()
 
@@ -340,7 +331,6 @@ def actor_s32_flag(flag_type: str, actor_name: str) -> int:
     old_exists = flag.exists()
     flag = S32Flag() if not old_exists else flag
     flag.set_data_name(flag_name)
-    flag.set_is_save(True)
     flag.set_max_value(2147483647)
     flag.set_min_value(0)
 
