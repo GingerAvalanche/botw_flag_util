@@ -114,7 +114,7 @@ def get_last_two_savedata_files() -> list:
             return files
 
 
-def make_new_gamedata(store: FlagStore, big_endian: bool) -> None:
+def make_new_gamedata(store: FlagStore, big_endian: bool) -> bytes:
     bgwriter = oead.SarcWriter(
         endian=oead.Endianness.Big if big_endian else oead.Endianness.Little
     )

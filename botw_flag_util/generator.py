@@ -24,6 +24,8 @@ from .store import FlagStore
 current_map: str = ""
 bgdata: FlagStore = FlagStore()
 mod_actors_with_life: set = set()
+added_flag_hashes: set = set()
+orphaned_flag_hashes: set = set()
 GENERATOR_FLAG_NAME_EXCEPTIONS: list = [
     "DgnMrgPrt",
 ]
@@ -118,6 +120,8 @@ def bool_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool 
     else:
         bgdata.add("bool_data", flag)
 
+    added_flag_hashes.add(flag.get_hash())
+
 
 def s32_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool = True) -> None:
     old_hash: int = ctypes.c_int32(zlib.crc32(get_flag_name(old_obj, maptype).encode())).value
@@ -149,6 +153,8 @@ def s32_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool =
     else:
         bgdata.add("s32_data", flag)
 
+    added_flag_hashes.add(flag.get_hash())
+
 
 def location_flag(name: str) -> None:
     flag = S32Flag()
@@ -165,6 +171,8 @@ def location_flag(name: str) -> None:
     else:
         bgdata.add("s32_data", flag)
 
+    added_flag_hashes.add(flag.get_hash())
+
 
 def misc_bool_flag(name: str) -> None:
     flag = BoolFlag()
@@ -178,20 +186,16 @@ def misc_bool_flag(name: str) -> None:
     else:
         bgdata.add("bool_data", flag)
 
+    added_flag_hashes.add(flag.get_hash())
+
 
 def generate_revival_flags_for_map(
     map_data: oead.byml.Hash, stock_map: oead.byml.Hash, maptype: str, resettype: int
-) -> dict:
-    r: dict = {"ignore": set(), "delete": set()}
+) -> None:
 
     map_hashes = [obj["HashId"].v for obj in map_data["Objs"]]
     stock_hashes = [obj["HashId"].v for obj in stock_map["Objs"]]
     for obj in map_data["Objs"]:
-        r["ignore"].add(
-            ctypes.c_int32(
-                zlib.crc32(f"{maptype}_{obj['UnitConfigName']}_{obj['HashId'].v}".encode())
-            ).value
-        )
         revival = True
         bflag = True
         if "LinkTag" in obj["UnitConfigName"]:
@@ -208,21 +212,16 @@ def generate_revival_flags_for_map(
                 s32_flag(obj, obj, maptype, resettype, revival)
         elif obj["HashId"].v in stock_hashes:
             stock_obj = stock_map["Objs"][stock_hashes.index(obj["HashId"].v)]
-            name_changed = obj["UnitConfigName"] != stock_obj["UnitConfigName"]
-            event_assoc_changed = bool("LinksToObj" in obj) != bool("LinksToObj" in stock_obj)
-            if name_changed or event_assoc_changed:
-                if bflag:
-                    bool_flag(obj, stock_obj, maptype, resettype, revival)
-                else:
-                    s32_flag(obj, stock_obj, maptype, resettype, revival)
+            if bflag:
+                bool_flag(obj, stock_obj, maptype, resettype, revival)
+            else:
+                s32_flag(obj, stock_obj, maptype, resettype, revival)
     for obj in stock_map["Objs"]:
         if obj["HashId"].v not in map_hashes:
             old_hash: int = ctypes.c_int32(
                 zlib.crc32(f"{maptype}_{obj['UnitConfigName']}_{obj['HashId'].v}".encode())
             ).value
-            r["delete"].add(old_hash)
-
-    return r
+            orphaned_flag_hashes.add(old_hash)
 
 
 def generate_revival_flags(resettypes: list) -> None:
@@ -236,10 +235,8 @@ def generate_revival_flags(resettypes: list) -> None:
             map_data = oead.byml.from_binary(oead.yaz0.decompress(map_unit.read_bytes()))
             map_section = map_unit.stem.split("_")
             stock_map = mubin.get_stock_map((map_section[0], map_section[1]))
-            temp = generate_revival_flags_for_map(map_data, stock_map, "MainField", resettypes[0])
+            generate_revival_flags_for_map(map_data, stock_map, "MainField", resettypes[0])
             print(f"Finished processing {map_unit.name} in {time.time() - map_start} seconds...")
-            ignore_hashes |= temp["ignore"]
-            delete_hashes |= temp["delete"]
         for static_unit in moddir.rglob("MainField/Static.smubin"):
             map_start = time.time()
             static_data = oead.byml.from_binary(oead.yaz0.decompress(static_unit.read_bytes()))
@@ -283,17 +280,13 @@ def generate_revival_flags(resettypes: list) -> None:
                 else:
                     stock_map = oead.byml.Hash()
                     stock_map["Objs"] = oead.byml.Array()
-                temp = generate_revival_flags_for_map(
-                    map_data, stock_map, "CDungeon", resettypes[1]
-                )
+                generate_revival_flags_for_map(map_data, stock_map, "CDungeon", resettypes[1])
                 print(f"Finished processing {map_name} in {time.time() - map_start} seconds...")
-                ignore_hashes |= temp["ignore"]
-                delete_hashes |= temp["delete"]
             current_map = ""
             # ^ unnecessary given that it's updated every loop, but we rely on it possibly being
             # empty for determining whether LinkTags are valid, so it's better to be safe
-    for hash in delete_hashes:
-        if hash not in ignore_hashes:
+    for hash in orphaned_flag_hashes:
+        if hash not in added_flag_hashes:
             bgdata.remove("bool_data", hash)
 
 

@@ -29,16 +29,47 @@
         },
         "OVERRIDE_RESET_TYPE": {
             "Clear_": 0,
-            "Open_": 0,
-            "Location_": 0,
             "DgnObj_EntranceTerminal": 0,
+            "EquipTime_": 0,
+            "IsGet_": 0,
             "IsInside_Dungeon": 0,
-            "MapTower_07_Demo": 0
+            "IsNewPictureBook_": 0,
+            "IsRegisteredPictureBook_": 0,
+            "Location_": 0,
+            "MapTower_07_Demo": 0,
+            "Open_": 0,
+            "PictureBookSize_": 0,
+            "PorchTime_": 0
         }
     },
     "BOOL_OVERRIDES": {
         "OVERRIDE_BOOL_CATEGORY": {
-            "Clear_": 1
+            "Clear_": 1,
+            "IsRegisteredPictureBook_AncientArrow": 5,
+            "IsRegisteredPictureBook_Animal": 2,
+            "IsRegisteredPictureBook_Bee": 4,
+            "IsRegisteredPictureBook_BombArrow": 5,
+            "IsRegisteredPictureBook_ElectricArrow": 5,
+            "IsRegisteredPictureBook_Enemy": 3,
+            "IsRegisteredPictureBook_FireArrow": 5,
+            "IsRegisteredPictureBook_GameRomHorse": 2,
+            "IsRegisteredPictureBook_IceArrow": 5,
+            "IsRegisteredPictureBook_Item_Fish": 2,
+            "IsRegisteredPictureBook_Item_Insect": 2,
+            "IsRegisteredPictureBook_Item_Fruit": 4,
+            "IsRegisteredPictureBook_Item_Mushroom": 4,
+            "IsRegisteredPictureBook_Item_Plant": 4,
+            "IsRegisteredPictureBook_NormalArrow": 5,
+            "IsRegisteredPictureBook_Obj_Mineral": 6,
+            "IsRegisteredPictureBook_RemainsFire_Drone": 3,
+            "IsRegisteredPictureBook_TBox": 6,
+            "IsRegisteredPictureBook_Weapon": 5,
+            "MainField_Npc_HiddenKorok": 11,
+            "_Dark": 7,
+            "_Dragon_": 7,
+            "_Ganon": 7,
+            "_Gold": 7,
+            "_SiteBoss_": 7
         },
         "OVERRIDE_BOOL_INIT_VALUE": {}
     },
