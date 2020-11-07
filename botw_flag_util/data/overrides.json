@@ -79,14 +79,32 @@
         "OVERRIDE_BOOL_ARRAY_MIN_VALUE": {}
     },
     "S32_OVERRRIDES": {
-        "OVERRIDE_S32_INIT_VALUE": {},
-        "OVERRIDE_S32_MAX_VALUE": {},
-        "OVERRIDE_S32_MIN_VALUE": {}
+        "OVERRIDE_S32_INIT_VALUE": {
+            "Location_": 0
+        },
+        "OVERRIDE_S32_MAX_VALUE": {
+            "Location_": 2147483647
+        },
+        "OVERRIDE_S32_MIN_VALUE": {
+            "Location_": -2147483648
+        }
     },
     "S32_ARRAY_OVERRIDES": {
-        "OVERRIDE_S32_ARRAY_INIT_VALUE": {},
-        "OVERRIDE_S32_ARRAY_MAX_VALUE": {},
-        "OVERRIDE_S32_ARRAY_MIN_VALUE": {}
+        "OVERRIDE_S32_ARRAY_INIT_VALUE": {
+            "EquipTime_": 0,
+            "PictureBookSize_": -1,
+            "PorchTime_": 0
+        },
+        "OVERRIDE_S32_ARRAY_MAX_VALUE": {
+            "EquipTime_": 2147483647,
+            "PictureBookSize_": 65536,
+            "PorchTime_": 2147483647
+        },
+        "OVERRIDE_S32_ARRAY_MIN_VALUE": {
+            "EquipTime_": 0,
+            "PictureBookSize_": -1,
+            "PorchTime_": 0
+        }
     },
     "F32_OVERRIDES": {
         "OVERRIDE_F32_INIT_VALUE": {},
