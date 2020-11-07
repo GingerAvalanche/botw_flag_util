@@ -78,9 +78,10 @@
         "OVERRIDE_BOOL_ARRAY_MAX_VALUE": {},
         "OVERRIDE_BOOL_ARRAY_MIN_VALUE": {}
     },
-    "S32_OVERRRIDES": {
+    "S32_OVERRIDES": {
         "OVERRIDE_S32_INIT_VALUE": {
-            "Location_": 0
+            "Location_": 0,
+            "Location_StartPoint": 1
         },
         "OVERRIDE_S32_MAX_VALUE": {
             "Location_": 2147483647

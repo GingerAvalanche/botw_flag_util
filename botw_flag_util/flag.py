@@ -40,8 +40,6 @@ class BFUFlag:
             self.reset_type = flag["ResetType"].v
 
     def __eq__(self, other):
-        if not type(other) == BFUFlag:
-            return NotImplemented
         if self is other:
             return True
         if (
@@ -207,7 +205,7 @@ class BoolFlag(BFUFlag):
         self.init_value = 0
         self.max_value = True
         self.min_value = False
-        self.revival = kwargs["revival"] if "revival" in kwargs else False
+        self.is_revival = kwargs["revival"] if "revival" in kwargs else False
         if flag:
             if not BoolFlag.validate_Hash(flag):
                 raise AttributeError(f"{flag['DataName']} is malformed.")
@@ -344,7 +342,7 @@ class BoolArrayFlag(BFUFlag):
             assert type(hash["InitValue"][0]) == Hash
             assert "Values" in hash["InitValue"][0]
             for value in hash["InitValue"][0]["Values"]:
-                assert value == S32
+                assert type(value) == S32
             assert type(hash["MaxValue"]) == bool
             assert type(hash["MinValue"]) == bool
             return True
@@ -410,10 +408,10 @@ class BoolArrayFlag(BFUFlag):
 class S32Flag(BFUFlag):
     def __init__(self, flag: Hash = None, **kwargs) -> None:
         super(S32Flag, self).__init__(flag=flag)
-        self.revival = kwargs["revival"] if "revival" in kwargs else False
-        self._init_value = 0
-        self._max_value = 2147483647
-        self._min_value = 0
+        self.init_value = 0
+        self.max_value = 2147483647
+        self.min_value = 0
+        self.is_revival = kwargs["revival"] if "revival" in kwargs else False
         if flag:
             if not S32Flag.validate_Hash(flag):
                 raise AttributeError(f"{flag['DataName']} is malformed.")
@@ -427,9 +425,9 @@ class S32Flag(BFUFlag):
         if not super(S32Flag, self).__eq__(super(S32Flag, other)):
             return False
         if (
-            not self._init_value == other._init_value
-            or not self._max_value == other._max_value
-            or not self._min_value == other._min_value
+            not self.init_value == other.init_value
+            or not self.max_value == other.max_value
+            or not self.min_value == other.min_value
         ):
             return False
         return True
@@ -478,11 +476,11 @@ class S32Flag(BFUFlag):
 
     @property
     def is_revival(self) -> bool:
-        return self._is_revival
+        return self._revival
 
     @is_revival.setter
     def is_revival(self, revival: bool) -> None:
-        self._is_revival = revival
+        self._revival = revival
 
     def use_name_to_override_params(self) -> None:
         """
@@ -493,7 +491,7 @@ class S32Flag(BFUFlag):
         certain flag types are upheld.
         """
         super(S32Flag, self).use_name_to_override_params()
-        OVERRIDES = overrides["S32_OVERRRIDES"]
+        OVERRIDES = overrides["S32_OVERRIDES"]
         for substr, value in OVERRIDES["OVERRIDE_S32_INIT_VALUE"].items():
             if substr in self._data_name:
                 self.init_value = value
@@ -539,7 +537,7 @@ class S32ArrayFlag(BFUFlag):
             assert type(hash["InitValue"][0]) == Hash
             assert "Values" in hash["InitValue"][0]
             for value in hash["InitValue"][0]["Values"]:
-                assert value == S32
+                assert type(value) == S32
             assert type(hash["MaxValue"]) == S32
             assert type(hash["MinValue"]) == S32
             return True
@@ -725,7 +723,7 @@ class F32ArrayFlag(BFUFlag):
             assert type(hash["InitValue"][0]) == Hash
             assert "Values" in hash["InitValue"][0]
             for value in hash["InitValue"][0]["Values"]:
-                assert value == F32
+                assert type(value) == F32
             assert type(hash["MaxValue"]) == F32
             assert type(hash["MinValue"]) == F32
             return True
@@ -953,7 +951,7 @@ class StringArrayFlag(BFUFlag):
             assert type(hash["InitValue"][0]) == Hash
             assert "Values" in hash["InitValue"][0]
             for value in hash["InitValue"][0]["Values"]:
-                assert value == str
+                assert type(value) == str
             assert type(hash["MaxValue"]) == str
             assert type(hash["MinValue"]) == str
             return True
@@ -1191,8 +1189,8 @@ class Vec2ArrayFlag(BFUFlag):
             assert type(hash["InitValue"][0]) == Hash
             assert "Values" in hash["InitValue"][0]
             for value in hash["InitValue"][0]["Values"]:
-                assert value[0][0] == F32
-                assert value[0][1] == F32
+                assert type(value[0][0]) == F32
+                assert type(value[0][1]) == F32
             assert type(hash["MaxValue"][0][0]) == F32
             assert type(hash["MaxValue"][0][1]) == F32
             assert type(hash["MinValue"][0][0]) == F32
@@ -1443,9 +1441,9 @@ class Vec3ArrayFlag(BFUFlag):
             assert type(hash["InitValue"][0]) == Hash
             assert "Values" in hash["InitValue"][0]
             for value in hash["InitValue"][0]["Values"]:
-                assert value[0][0] == F32
-                assert value[0][1] == F32
-                assert value[0][2] == F32
+                assert type(value[0][0]) == F32
+                assert type(value[0][1]) == F32
+                assert type(value[0][2]) == F32
             assert type(hash["MaxValue"][0][0]) == F32
             assert type(hash["MaxValue"][0][1]) == F32
             assert type(hash["MaxValue"][0][2]) == F32
