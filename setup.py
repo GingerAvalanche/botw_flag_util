@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="botw_flag_util",
-    version="0.2.12",
+    version="0.2.13",
     author="Ginger",
     author_email="chodness@gmail.com",
     description="Game data and save game data flag utilities for LoZ:BotW",
@@ -22,5 +22,5 @@ setuptools.setup(
         "Development Status :: 4 - Beta",
     ],
     python_requires=">=3.7.4",
-    install_requires=["bcml>=3.0.0b25", "oead>=0.11.2",],
+    install_requires=["bcml>=3.0.0b25", "oead>=0.11.2"],
 )
