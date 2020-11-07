@@ -29,7 +29,7 @@ def main() -> None:
     )
     g_parser.add_argument("directory", help="The root folder of your mod")
     g_parser.add_argument(
-        "-a", "--actor", help="Generate IsGet_/compendium flags for actors", action="store_true",
+        "-a", "--actor", help="Generate IsGet_/compendium flags for actors", action="store_true"
     )
     g_parser.add_argument(
         "-r",
@@ -45,10 +45,10 @@ def main() -> None:
 
     for p in [f_parser, g_parser]:
         p.add_argument(
-            "-b", "--bigendian", help="Use big endian mode (for Wii U)", action="store_true",
+            "-b", "--bigendian", help="Use big endian mode (for Wii U)", action="store_true"
         )
         p.add_argument(
-            "-v", "--verbose", help="Give verbose after-action report", action="store_true",
+            "-v", "--verbose", help="Give verbose after-action report", action="store_true"
         )
 
     args = parser.parse_args()

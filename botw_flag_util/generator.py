@@ -273,14 +273,14 @@ def generate_revival_flags(resettypes: list) -> None:
             bgdata.remove("bool_data", hash)
 
 
-def actor_bool_flag(flag_type: str, actor_name: str) -> int:
-    flag_name: str = f"{flag_type}_{actor_name}"
+def actor_bool_flag(flag_name: str) -> int:
     flag_hash: int = ctypes.c_int32(zlib.crc32(flag_name.encode())).value
 
     flag = bgdata.find("bool_data", flag_hash)
     old_exists = flag.exists()
     flag = BoolFlag() if not old_exists else flag
     flag.data_name = flag_name
+    flag.is_save = True
     flag.use_name_to_override_params()
 
     mod_flag = bgdata.find("bool_data", flag.hash_value)
@@ -292,14 +292,14 @@ def actor_bool_flag(flag_type: str, actor_name: str) -> int:
     return flag.hash_value
 
 
-def actor_s32_flag(flag_type: str, actor_name: str) -> int:
-    flag_name: str = f"{flag_type}_{actor_name}"
+def actor_s32_flag(flag_name: str) -> int:
     flag_hash: int = ctypes.c_int32(zlib.crc32(flag_name.encode())).value
 
     flag = bgdata.find("s32_data", flag_hash)
     old_exists = flag.exists()
     flag = S32Flag() if not old_exists else flag
     flag.data_name = flag_name
+    flag.is_save = True
     flag.use_name_to_override_params()
 
     mod_flag = bgdata.find("bool_data", flag.hash_value)
@@ -316,22 +316,69 @@ def generate_item_flags() -> None:
     mod_bool: set = set()
     mod_s32: set = set()
     for actor in moddir.rglob("*.sbactorpack"):
-        if "Item_" in actor.name:
-            mod_bool.add(actor_bool_flag("IsNewPictureBook", str(actor.stem)))
-            mod_bool.add(actor_bool_flag("IsRegisteredPictureBook", str(actor.stem)))
-            mod_bool.add(actor_bool_flag("IsGet", str(actor.stem)))
-            mod_s32.add(actor_s32_flag("PictureBookSize", str(actor.stem)))
+        if "Animal_" in actor.name:
+            mod_bool.add(actor_bool_flag(f"IsNewPictureBook_{actor.stem}"))
+            mod_bool.add(actor_bool_flag(f"IsRegisteredPictureBook_{actor.stem}"))
+            mod_s32.add(actor_s32_flag(f"PictureBookSize_{actor.stem}"))
+            bxml = oead.aamp.ParameterIO.from_binary(
+                oead.Sarc(oead.yaz0.decompress(actor.read_bytes()))
+                .get_file(f"Actor/ActorLink/{actor.stem}.bxml")
+                .data
+            )
+            if "Tags" in bxml.objects:
+                for _, tag in bxml.objects["Tags"].params.items():
+                    if tag == "CanGetPouch":
+                        mod_bool.add(actor_bool_flag(f"IsGet_{actor.stem}"))
+                        break
+            del bxml
         elif "Armor_" in actor.name:
-            mod_bool.add(actor_bool_flag("IsGet", str(actor.stem)))
-            mod_s32.add(actor_s32_flag("EquipTime", str(actor.stem)))
-            mod_s32.add(actor_s32_flag("PorchTime", str(actor.stem)))
+            mod_bool.add(actor_bool_flag(f"IsGet_{actor.stem}"))
+            mod_s32.add(actor_s32_flag(f"EquipTime_{actor.stem}"))
+            mod_s32.add(actor_s32_flag(f"PorchTime_{actor.stem}"))
+        elif "Enemy_" in actor.name:
+            mod_bool.add(actor_bool_flag(f"IsNewPictureBook_{actor.stem}"))
+            mod_bool.add(actor_bool_flag(f"IsRegisteredPictureBook_{actor.stem}"))
+            mod_s32.add(actor_s32_flag(f"PictureBookSize_{actor.stem}"))
+        elif "Item_" in actor.name:
+            mod_bool.add(actor_bool_flag(f"IsNewPictureBook_{actor.stem}"))
+            mod_bool.add(actor_bool_flag(f"IsRegisteredPictureBook_{actor.stem}"))
+            mod_bool.add(actor_bool_flag(f"IsGet_{actor.stem}"))
+            mod_s32.add(actor_s32_flag(f"PictureBookSize_{actor.stem}"))
+        elif "Npc_" in actor.name:
+            sarc = oead.Sarc(oead.yaz0.decompress(actor.read_bytes()))
+            bxml = oead.aamp.ParameterIO.from_binary(
+                sarc.get_file(f"Actor/ActorLink/{actor.stem}.bxml").data
+            )
+            shop_link = bxml.objects["LinkTarget"].params["ShopDataUser"]
+            del bxml
+            if shop_link == "Dummy":
+                del sarc
+                continue
+            mod_bool.add(actor_bool_flag(f"{actor.stem}_SoldOut"))
+            bshop = oead.aamp.ParameterIO.from_binary(
+                sarc.get_file(f"Actor/ShopData/{shop_link}.bshop").data
+            )
+            del sarc
+            for tablekey, tablename in bshop.objects["Header"].params.items():
+                if tablekey.hash == zlib.crc32(b"TableNum"):
+                    continue
+                for _, val in bshop.objects[str(tablename)].params.items():
+                    if isinstance(val, oead.FixedSafeString64):
+                        mod_s32.add(actor_s32_flag(f"{actor.stem}_{str(val)}"))
+            del bshop
         elif "Weapon_" in actor.name:
-            mod_bool.add(actor_bool_flag("IsNewPictureBook", str(actor.stem)))
-            mod_bool.add(actor_bool_flag("IsRegisteredPictureBook", str(actor.stem)))
-            mod_bool.add(actor_bool_flag("IsGet", str(actor.stem)))
-            mod_s32.add(actor_s32_flag("PictureBookSize", str(actor.stem)))
-            mod_s32.add(actor_s32_flag("EquipTime", str(actor.stem)))
-            mod_s32.add(actor_s32_flag("PorchTime", str(actor.stem)))
+            mod_bool.add(actor_bool_flag(f"IsNewPictureBook_{actor.stem}"))
+            mod_bool.add(actor_bool_flag(f"IsRegisteredPictureBook_{actor.stem}"))
+            mod_bool.add(actor_bool_flag(f"IsGet_{actor.stem}"))
+            mod_s32.add(actor_s32_flag(f"PictureBookSize_{actor.stem}"))
+            mod_s32.add(actor_s32_flag(f"EquipTime_{actor.stem}"))
+            mod_s32.add(actor_s32_flag(f"PorchTime_{actor.stem}"))
+
+    """
+    This code section is meant to delete flags for actors that have been removed.
+    However, the likelihood of this ever actually needing to happen is so low,
+    and the cost of maintaining it so comparatively high, that it's being removed
+    for now. I might explore reimplementing it at a later date.
 
     vanilla_hashes: set = set()
     for _, hash_list in vanilla_hash_dict.items():
@@ -352,6 +399,7 @@ def generate_item_flags() -> None:
     to_delete = total_s32 - (mod_s32 | vanilla_hashes)
     for hash in to_delete:
         bgdata.remove("s32_data", hash)
+    """
 
 
 def generate(args):

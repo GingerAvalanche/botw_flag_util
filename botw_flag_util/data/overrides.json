@@ -92,16 +92,19 @@
     "S32_ARRAY_OVERRIDES": {
         "OVERRIDE_S32_ARRAY_INIT_VALUE": {
             "EquipTime_": 0,
+            "Npc_": 0,
             "PictureBookSize_": -1,
             "PorchTime_": 0
         },
         "OVERRIDE_S32_ARRAY_MAX_VALUE": {
             "EquipTime_": 2147483647,
+            "Npc_": 65535,
             "PictureBookSize_": 65536,
             "PorchTime_": 2147483647
         },
         "OVERRIDE_S32_ARRAY_MIN_VALUE": {
             "EquipTime_": 0,
+            "Npc_": 0,
             "PictureBookSize_": -1,
             "PorchTime_": 0
         }
