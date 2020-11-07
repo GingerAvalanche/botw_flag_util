@@ -103,24 +103,19 @@ def bool_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool 
     flag = bgdata.find("bool_data", old_hash)
     old_exists = flag.exists()
     flag = BoolFlag(revival=revival) if not old_exists else flag
-    flag.set_data_name(new_name)
-    flag.set_event_assoc(bool("LinksToObj" in new_obj))
-    flag.set_is_save(True)
-    flag.set_reset_type(resettype)
-
+    flag.data_name = new_name
+    flag.is_event_associated = bool("LinksToObj" in new_obj)
+    flag.is_save = True
+    flag.reset_type = resettype
     flag.use_name_to_override_params()
 
-    mod_flag = bgdata.find("bool_data", flag.get_hash())
+    mod_flag = bgdata.find("bool_data", flag.hash_value)
     if mod_flag.exists():
-        old_exists = True
-        old_hash = mod_flag.get_hash()
-
-    if old_exists:
-        bgdata.modify("bool_data", old_hash, flag)
+        bgdata.modify("bool_data", flag.hash_value, flag)
     else:
         bgdata.add("bool_data", flag)
 
-    added_flag_hashes.add(flag.get_hash())
+    added_flag_hashes.add(flag.hash_value)
 
 
 def s32_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool = True) -> None:
@@ -136,57 +131,47 @@ def s32_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool =
     flag = bgdata.find("s32_data", old_hash)
     old_exists = flag.exists()
     flag = S32Flag(revival=revival) if not old_exists else flag
-    flag.set_data_name(new_name)
-    flag.set_event_assoc(bool("LinksToObj" in new_obj))
-    flag.set_is_save(True)
-    flag.set_reset_type(resettype)
-
+    flag.data_name = new_name
+    flag.is_event_associated = bool("LinksToObj" in new_obj)
+    flag.is_save = True
+    flag.reset_type = resettype
     flag.use_name_to_override_params()
 
-    mod_flag = bgdata.find("s32_data", flag.get_hash())
+    mod_flag = bgdata.find("s32_data", flag.hash_value)
     if mod_flag.exists():
-        old_exists = True
-        old_hash = mod_flag.get_hash()
-
-    if old_exists:
-        bgdata.modify("s32_data", old_hash, flag)
+        bgdata.modify("s32_data", flag.hash_value, flag)
     else:
         bgdata.add("s32_data", flag)
 
-    added_flag_hashes.add(flag.get_hash())
+    added_flag_hashes.add(flag.hash_value)
 
 
-def location_flag(name: str) -> None:
+def misc_s32_flag(name: str) -> None:
     flag = S32Flag()
-    flag.set_data_name(name)
-    flag.set_init_value(0)
-    flag.set_max_value(2147483647)
-    flag.set_min_value(-2147483648)
-
+    flag.data_name = name
     flag.use_name_to_override_params()
 
-    old_flag = bgdata.find("s32_data", flag.get_hash())
+    old_flag = bgdata.find("s32_data", flag.hash_value)
     if old_flag.exists():
-        bgdata.modify("s32_data", old_flag.get_hash(), flag)
+        bgdata.modify("s32_data", old_flag.hash_value, flag)
     else:
         bgdata.add("s32_data", flag)
 
-    added_flag_hashes.add(flag.get_hash())
+    added_flag_hashes.add(flag.hash_value)
 
 
 def misc_bool_flag(name: str) -> None:
     flag = BoolFlag()
-    flag.set_data_name(name)
-
+    flag.data_name = name
     flag.use_name_to_override_params()
 
-    old_flag = bgdata.find("bool_data", flag.get_hash())
+    old_flag = bgdata.find("bool_data", flag.hash_value)
     if old_flag.exists():
-        bgdata.modify("bool_data", old_flag.get_hash(), flag)
+        bgdata.modify("bool_data", old_flag.hash_value, flag)
     else:
         bgdata.add("bool_data", flag)
 
-    added_flag_hashes.add(flag.get_hash())
+    added_flag_hashes.add(flag.hash_value)
 
 
 def generate_revival_flags_for_map(
@@ -226,8 +211,6 @@ def generate_revival_flags_for_map(
 
 def generate_revival_flags(resettypes: list) -> None:
     moddir: Path = util.root_dir()
-    ignore_hashes: set = set()
-    delete_hashes: set = set()
 
     if not resettypes[0] == -1:
         for map_unit in moddir.rglob("*_*.smubin"):
@@ -247,7 +230,7 @@ def generate_revival_flags(resettypes: list) -> None:
                     continue
                 if "MessageID" in marker:
                     if not marker["MessageID"] in vanilla_shrine_locs:
-                        location_flag(marker["SaveFlag"])
+                        misc_s32_flag(marker["SaveFlag"])
                         misc_bool_flag(f"Enter_{marker['MessageID']}")
                         misc_bool_flag(f"CompleteTreasure_{marker['MessageID']}")
             print(
@@ -290,30 +273,23 @@ def generate_revival_flags(resettypes: list) -> None:
             bgdata.remove("bool_data", hash)
 
 
-def actor_bool_flag(flag_type: str, actor_name: str, cat: int = -1) -> int:
+def actor_bool_flag(flag_type: str, actor_name: str) -> int:
     flag_name: str = f"{flag_type}_{actor_name}"
     flag_hash: int = ctypes.c_int32(zlib.crc32(flag_name.encode())).value
 
     flag = bgdata.find("bool_data", flag_hash)
     old_exists = flag.exists()
     flag = BoolFlag() if not old_exists else flag
-    flag.set_data_name(flag_name)
-    if not cat == -1:
-        flag.set_category(cat)
-
+    flag.data_name = flag_name
     flag.use_name_to_override_params()
 
-    mod_flag = bgdata.find("bool_data", flag.get_hash())
+    mod_flag = bgdata.find("bool_data", flag.hash_value)
     if mod_flag.exists():
-        old_exists = True
-        old_hash = mod_flag.get_hash()
-
-    if old_exists:
-        bgdata.modify("bool_data", flag_hash, flag)
+        bgdata.modify("bool_data", flag.hash_value, flag)
     else:
         bgdata.add("bool_data", flag)
 
-    return flag.get_hash()
+    return flag.hash_value
 
 
 def actor_s32_flag(flag_type: str, actor_name: str) -> int:
@@ -323,45 +299,39 @@ def actor_s32_flag(flag_type: str, actor_name: str) -> int:
     flag = bgdata.find("s32_data", flag_hash)
     old_exists = flag.exists()
     flag = S32Flag() if not old_exists else flag
-    flag.set_data_name(flag_name)
-    flag.set_max_value(2147483647)
-    flag.set_min_value(0)
-
+    flag.data_name = flag_name
     flag.use_name_to_override_params()
 
-    mod_flag = bgdata.find("bool_data", flag.get_hash())
+    mod_flag = bgdata.find("bool_data", flag.hash_value)
     if mod_flag.exists():
-        old_exists = True
-        old_hash = mod_flag.get_hash()
-
-    if old_exists:
-        bgdata.modify("s32_data", flag_hash, flag)
+        bgdata.modify("s32_data", flag.hash_value, flag)
     else:
         bgdata.add("s32_data", flag)
 
-    return flag.get_hash()
+    return flag.hash_value
 
 
 def generate_item_flags() -> None:
     moddir: Path = util.root_dir()
     mod_bool: set = set()
     mod_s32: set = set()
-    for item_actor in moddir.rglob("**/Item_*.sbactorpack"):
-        mod_bool.add(actor_bool_flag("IsNewPictureBook", str(item_actor.stem)))
-        mod_bool.add(actor_bool_flag("IsRegisteredPictureBook", str(item_actor.stem), 4))
-        mod_bool.add(actor_bool_flag("IsGet", str(item_actor.stem)))
-        mod_s32.add(actor_s32_flag("PictureBookSize", str(item_actor.stem)))
-    for armor_actor in moddir.rglob("**/Armor_*.sbactorpack"):
-        mod_bool.add(actor_bool_flag("IsGet", str(armor_actor.stem)))
-        mod_s32.add(actor_s32_flag("EquipTime", str(armor_actor.stem)))
-        mod_s32.add(actor_s32_flag("PorchTime", str(armor_actor.stem)))
-    for weapon_actor in moddir.rglob("**/Weapon_*.sbactorpack"):
-        mod_bool.add(actor_bool_flag("IsNewPictureBook", str(weapon_actor.stem)))
-        mod_bool.add(actor_bool_flag("IsRegisteredPictureBook", str(weapon_actor.stem), 5))
-        mod_bool.add(actor_bool_flag("IsGet", str(weapon_actor.stem)))
-        mod_s32.add(actor_s32_flag("PictureBookSize", str(weapon_actor.stem)))
-        mod_s32.add(actor_s32_flag("EquipTime", str(weapon_actor.stem)))
-        mod_s32.add(actor_s32_flag("PorchTime", str(weapon_actor.stem)))
+    for actor in moddir.rglob("*.sbactorpack"):
+        if "Item_" in actor.name:
+            mod_bool.add(actor_bool_flag("IsNewPictureBook", str(actor.stem)))
+            mod_bool.add(actor_bool_flag("IsRegisteredPictureBook", str(actor.stem)))
+            mod_bool.add(actor_bool_flag("IsGet", str(actor.stem)))
+            mod_s32.add(actor_s32_flag("PictureBookSize", str(actor.stem)))
+        elif "Armor_" in actor.name:
+            mod_bool.add(actor_bool_flag("IsGet", str(actor.stem)))
+            mod_s32.add(actor_s32_flag("EquipTime", str(actor.stem)))
+            mod_s32.add(actor_s32_flag("PorchTime", str(actor.stem)))
+        elif "Weapon_" in actor.name:
+            mod_bool.add(actor_bool_flag("IsNewPictureBook", str(actor.stem)))
+            mod_bool.add(actor_bool_flag("IsRegisteredPictureBook", str(actor.stem)))
+            mod_bool.add(actor_bool_flag("IsGet", str(actor.stem)))
+            mod_s32.add(actor_s32_flag("PictureBookSize", str(actor.stem)))
+            mod_s32.add(actor_s32_flag("EquipTime", str(actor.stem)))
+            mod_s32.add(actor_s32_flag("PorchTime", str(actor.stem)))
 
     vanilla_hashes: set = set()
     for _, hash_list in vanilla_hash_dict.items():
