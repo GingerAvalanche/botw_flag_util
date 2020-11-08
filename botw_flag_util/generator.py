@@ -29,48 +29,43 @@ orphaned_flag_hashes: set = set()
 GENERATOR_FLAG_NAME_EXCEPTIONS: list = [
     "DgnMrgPrt",
 ]
-LINKTAG_SAVEFLAG_EXCEPTIONS: list = []
 
 
-def should_not_make_flag(obj) -> bool:
+def should_make_flag(obj) -> bool:
     if "!Parameters" in obj:
         if "ForceFlag" in obj["!Parameters"]:
-            return not obj["!Parameters"]["ForceFlag"]
+            return obj["!Parameters"]["ForceFlag"]
 
     if "LinkTag" in obj["UnitConfigName"]:
-        makeflag = obj["!Parameters"]["MakeSaveFlag"].v
+        try:
+            makeflag = obj["!Parameters"]["MakeSaveFlag"].v
+        except KeyError:
+            return False
         if makeflag == 0 and not "SaveFlag" in obj["!Parameters"]:
-            return True
-        elif makeflag == 0:
-            if obj["!Parameters"]["SaveFlag"] in LINKTAG_SAVEFLAG_EXCEPTIONS:
-                return True
-        else:
             return False
-
-    if "TBox" in obj["UnitConfigName"]:
-        if "EnableRevival" in obj["!Parameters"]:
-            return not obj["!Parameters"]["EnableRevival"]
-        else:
-            return False
+        return True
 
     for substr in GENERATOR_FLAG_NAME_EXCEPTIONS:
         if substr in obj["UnitConfigName"]:
-            return True
+            return False
 
     if obj["UnitConfigName"] in mod_actors_with_life:
-        return False
+        return True
 
     if obj["UnitConfigName"] in vanilla_actors["with_flags"]:
-        return False
-    return True
+        return True
+    return False
 
 
 def get_flag_name(obj, maptype: str) -> str:
     if "LinkTag" in obj["UnitConfigName"] and "!Parameters" in obj:
-        makeflag = obj["!Parameters"]["MakeSaveFlag"].v
+        try:
+            makeflag = obj["!Parameters"]["MakeSaveFlag"].v
+        except KeyError:
+            return ""
         if makeflag == 0 and "SaveFlag" in obj["!Parameters"]:
             return obj["!Parameters"]["SaveFlag"]
-            # should_not_make_flag() will stop cases where `not "SaveFlag" in obj["!Parameters"]`
+            # should_make_flag() will stop cases where `not "SaveFlag" in obj["!Parameters"]`
         elif makeflag == 1:
             if not current_map:
                 raise ValueError(
@@ -93,27 +88,31 @@ def get_flag_name(obj, maptype: str) -> str:
 def bool_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool = True) -> None:
     old_hash: int = ctypes.c_int32(zlib.crc32(get_flag_name(old_obj, maptype).encode())).value
     new_name: str = get_flag_name(new_obj, maptype)
-    new_hash: int = ctypes.c_int32(zlib.crc32(new_name.encode())).value
 
-    if should_not_make_flag(new_obj):
+    if not should_make_flag(new_obj):
         bgdata.remove("bool_data", old_hash)
+        new_hash = ctypes.c_int32(zlib.crc32(new_name.encode())).value
         bgdata.remove("bool_data", new_hash)
         return
 
+    if "TBox" in new_obj["UnitConfigName"]:
+        if "EnableRevival" in new_obj["!Parameters"]:
+            resettype = int(new_obj["!Parameters"]["EnableRevival"])
+
     flag = bgdata.find("bool_data", old_hash)
     old_exists = flag.exists()
-    flag = BoolFlag(revival=revival) if not old_exists else flag
+    if not old_exists:
+        flag = bgdata.find("bool_data", ctypes.c_int32(zlib.crc32(new_name.encode())).value)
+        if not flag.exists():
+            flag = BoolFlag(revival=revival)
+            flag.is_save = True
+            flag.reset_type = resettype
     flag.data_name = new_name
-    flag.is_event_associated = bool("LinksToObj" in new_obj)
-    flag.is_save = True
-    flag.reset_type = resettype
     flag.use_name_to_override_params()
 
-    mod_flag = bgdata.find("bool_data", flag.hash_value)
-    if mod_flag.exists():
-        bgdata.modify("bool_data", flag.hash_value, flag)
-    else:
-        bgdata.add("bool_data", flag)
+    if old_exists:
+        bgdata.remove("bool_data", old_hash)
+    bgdata.add("bool_data", flag)
 
     added_flag_hashes.add(flag.hash_value)
 
@@ -121,27 +120,27 @@ def bool_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool 
 def s32_flag(new_obj, old_obj, maptype: str, resettype: int = 1, revival: bool = True) -> None:
     old_hash: int = ctypes.c_int32(zlib.crc32(get_flag_name(old_obj, maptype).encode())).value
     new_name: str = get_flag_name(new_obj, maptype)
-    new_hash: int = ctypes.c_int32(zlib.crc32(new_name.encode())).value
 
-    if should_not_make_flag(new_obj):
+    if not should_make_flag(new_obj):
         bgdata.remove("s32_data", old_hash)
+        new_hash = ctypes.c_int32(zlib.crc32(new_name.encode())).value
         bgdata.remove("s32_data", new_hash)
         return
 
     flag = bgdata.find("s32_data", old_hash)
     old_exists = flag.exists()
-    flag = S32Flag(revival=revival) if not old_exists else flag
+    if not old_exists:
+        flag = bgdata.find("s32_data", ctypes.c_int32(zlib.crc32(new_name.encode())).value)
+        if not flag.exists():
+            flag = S32Flag(revival=revival)
+            flag.is_save = True
+            flag.reset_type = resettype
     flag.data_name = new_name
-    flag.is_event_associated = bool("LinksToObj" in new_obj)
-    flag.is_save = True
-    flag.reset_type = resettype
     flag.use_name_to_override_params()
 
-    mod_flag = bgdata.find("s32_data", flag.hash_value)
-    if mod_flag.exists():
-        bgdata.modify("s32_data", flag.hash_value, flag)
-    else:
-        bgdata.add("s32_data", flag)
+    if old_exists:
+        bgdata.remove("s32_data", old_hash)
+    bgdata.add("s32_data", flag)
 
     added_flag_hashes.add(flag.hash_value)
 
@@ -151,11 +150,7 @@ def misc_s32_flag(name: str) -> None:
     flag.data_name = name
     flag.use_name_to_override_params()
 
-    old_flag = bgdata.find("s32_data", flag.hash_value)
-    if old_flag.exists():
-        bgdata.modify("s32_data", old_flag.hash_value, flag)
-    else:
-        bgdata.add("s32_data", flag)
+    bgdata.add("s32_data", flag)
 
     added_flag_hashes.add(flag.hash_value)
 
@@ -165,11 +160,7 @@ def misc_bool_flag(name: str) -> None:
     flag.data_name = name
     flag.use_name_to_override_params()
 
-    old_flag = bgdata.find("bool_data", flag.hash_value)
-    if old_flag.exists():
-        bgdata.modify("bool_data", old_flag.hash_value, flag)
-    else:
-        bgdata.add("bool_data", flag)
+    bgdata.add("bool_data", flag)
 
     added_flag_hashes.add(flag.hash_value)
 
@@ -274,39 +265,21 @@ def generate_revival_flags(resettypes: list) -> None:
 
 
 def actor_bool_flag(flag_name: str) -> int:
-    flag_hash: int = ctypes.c_int32(zlib.crc32(flag_name.encode())).value
-
-    flag = bgdata.find("bool_data", flag_hash)
-    old_exists = flag.exists()
-    flag = BoolFlag() if not old_exists else flag
+    flag = BoolFlag()
     flag.data_name = flag_name
-    flag.is_save = True
     flag.use_name_to_override_params()
 
-    mod_flag = bgdata.find("bool_data", flag.hash_value)
-    if mod_flag.exists():
-        bgdata.modify("bool_data", flag.hash_value, flag)
-    else:
-        bgdata.add("bool_data", flag)
+    bgdata.add("bool_data", flag)
 
     return flag.hash_value
 
 
 def actor_s32_flag(flag_name: str) -> int:
-    flag_hash: int = ctypes.c_int32(zlib.crc32(flag_name.encode())).value
-
-    flag = bgdata.find("s32_data", flag_hash)
-    old_exists = flag.exists()
-    flag = S32Flag() if not old_exists else flag
+    flag = S32Flag()
     flag.data_name = flag_name
-    flag.is_save = True
     flag.use_name_to_override_params()
 
-    mod_flag = bgdata.find("bool_data", flag.hash_value)
-    if mod_flag.exists():
-        bgdata.modify("s32_data", flag.hash_value, flag)
-    else:
-        bgdata.add("s32_data", flag)
+    bgdata.add("s32_data", flag)
 
     return flag.hash_value
 
