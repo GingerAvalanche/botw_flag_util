@@ -9,7 +9,11 @@
             "CompleteTreasure_": true,
             "Enter_": true,
             "IsGet_": true,
-            "Open_": true
+            "Open_": true,
+            "IsGet_PortableUnit": false,
+            "Clear_Remains": false,
+            "Open_Door": false,
+            "FinalTrial_Open_DoorBoss": true
         },
         "OVERRIDE_IS_PROGRAM_READABLE": {},
         "OVERRIDE_IS_PROGRAM_WRITABLE": {
@@ -65,11 +69,12 @@
             "IsRegisteredPictureBook_TBox": 6,
             "IsRegisteredPictureBook_Weapon": 5,
             "MainField_Npc_HiddenKorok": 11,
-            "_Dark": 7,
-            "_Dragon_": 7,
-            "_Ganon": 7,
-            "_Gold": 7,
-            "_SiteBoss_": 7
+            "IsRegisteredPictureBook_Enemy_.*_Dark": 7,
+            "IsRegisteredPictureBook_Enemy_.*_Gold": 7,
+            "IsRegisteredPictureBook_Enemy_Dragon": 7,
+            "IsRegisteredPictureBook_Enemy_Ganon": 7,
+            "IsRegisteredPictureBook_Enemy_SiteBoss": 7,
+            "Dungeon_Clear_": -1
         },
         "OVERRIDE_BOOL_INIT_VALUE": {}
     },

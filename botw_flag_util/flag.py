@@ -13,6 +13,7 @@ from oead import (
 from oead.byml import Hash, Array
 from typing import List, Tuple
 from zlib import crc32
+import re
 
 from . import overrides
 
@@ -178,23 +179,23 @@ class BFUFlag:
         certain flag types are upheld.
         """
         OVERRIDES = overrides["STANDARD_OVERRIDES"]
-        for substr, value in OVERRIDES["OVERRIDE_IS_EVENT_ASSOCIATED"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_IS_EVENT_ASSOCIATED"].items():
+            if re.search(regex, self.data_name):
                 self.is_event_associated = value
-        for substr, value in OVERRIDES["OVERRIDE_IS_ONE_TRIGGER"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_IS_ONE_TRIGGER"].items():
+            if re.search(regex, self.data_name):
                 self.is_one_trigger = value
-        for substr, value in OVERRIDES["OVERRIDE_IS_PROGRAM_READABLE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_IS_PROGRAM_READABLE"].items():
+            if re.search(regex, self.data_name):
                 self.is_program_readable = value
-        for substr, value in OVERRIDES["OVERRIDE_IS_PROGRAM_WRITABLE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_IS_PROGRAM_WRITABLE"].items():
+            if re.search(regex, self.data_name):
                 self.is_program_writable = value
-        for substr, value in OVERRIDES["OVERRIDE_IS_SAVE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_IS_SAVE"].items():
+            if re.search(regex, self.data_name):
                 self.is_save = value
-        for substr, value in OVERRIDES["OVERRIDE_RESET_TYPE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_RESET_TYPE"].items():
+            if re.search(regex, self.data_name):
                 self.reset_type = value
 
 
@@ -300,11 +301,11 @@ class BoolFlag(BFUFlag):
         """
         super(BoolFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["BOOL_OVERRIDES"]
-        for substr, value in OVERRIDES["OVERRIDE_BOOL_CATEGORY"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_BOOL_CATEGORY"].items():
+            if re.search(regex, self.data_name):
                 self.category = value
-        for substr, value in OVERRIDES["OVERRIDE_BOOL_INIT_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_BOOL_INIT_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.init_value = value
 
 
@@ -394,14 +395,14 @@ class BoolArrayFlag(BFUFlag):
         """
         super(BoolArrayFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["BOOL_ARRAY_OVERRIDES"]
-        for substr, value in OVERRIDES["OVERRIDE_BOOL_ARRAY_INIT_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_BOOL_ARRAY_INIT_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.init_value = value
-        for substr, value in OVERRIDES["OVERRIDE_BOOL_ARRAY_MAX_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_BOOL_ARRAY_MAX_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.max_value = value
-        for substr, value in OVERRIDES["OVERRIDE_BOOL_ARRAY_MIN_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_BOOL_ARRAY_MIN_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.min_value = value
 
 
@@ -492,14 +493,14 @@ class S32Flag(BFUFlag):
         """
         super(S32Flag, self).use_name_to_override_params()
         OVERRIDES = overrides["S32_OVERRIDES"]
-        for substr, value in OVERRIDES["OVERRIDE_S32_INIT_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_S32_INIT_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.init_value = value
-        for substr, value in OVERRIDES["OVERRIDE_S32_MAX_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_S32_MAX_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.max_value = value
-        for substr, value in OVERRIDES["OVERRIDE_S32_MIN_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_S32_MIN_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.min_value = value
 
 
@@ -589,14 +590,14 @@ class S32ArrayFlag(BFUFlag):
         """
         super(S32ArrayFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["S32_ARRAY_OVERRIDES"]
-        for substr, value in OVERRIDES["OVERRIDE_S32_ARRAY_INIT_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_S32_ARRAY_INIT_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.init_value = value
-        for substr, value in OVERRIDES["OVERRIDE_S32_ARRAY_MAX_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_S32_ARRAY_MAX_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.max_value = value
-        for substr, value in OVERRIDES["OVERRIDE_S32_ARRAY_MIN_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_S32_ARRAY_MIN_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.min_value = value
 
 
@@ -678,14 +679,14 @@ class F32Flag(BFUFlag):
         """
         super(F32Flag, self).use_name_to_override_params()
         OVERRIDES = overrides["F32_OVERRIDES"]
-        for substr, value in OVERRIDES["OVERRIDE_F32_INIT_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_F32_INIT_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.init_value = value
-        for substr, value in OVERRIDES["OVERRIDE_F32_MAX_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_F32_MAX_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.max_value = value
-        for substr, value in OVERRIDES["OVERRIDE_F32_MIN_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_F32_MIN_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.min_value = value
 
 
@@ -775,14 +776,14 @@ class F32ArrayFlag(BFUFlag):
         """
         super(F32ArrayFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["F32_ARRAY_OVERRIDES"]
-        for substr, value in OVERRIDES["OVERRIDE_F32_ARRAY_INIT_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_F32_ARRAY_INIT_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.init_value = value
-        for substr, value in OVERRIDES["OVERRIDE_F32_ARRAY_MAX_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_F32_ARRAY_MAX_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.max_value = value
-        for substr, value in OVERRIDES["OVERRIDE_F32_ARRAY_MIN_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_F32_ARRAY_MIN_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.min_value = value
 
 
@@ -800,7 +801,7 @@ class StringFlag(BFUFlag):
             self.min_value = flag["MinValue"]
 
     def __eq__(self, other):
-        if not type(other) == StringFlag:
+        if not isinstance(other, StringFlag):
             return NotImplemented
         if not super(StringFlag, self).__eq__(super(StringFlag, other)):
             return False
@@ -861,14 +862,14 @@ class StringFlag(BFUFlag):
         """
         super(StringFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["STRING_OVERRIDES"]
-        for substr, value in OVERRIDES["OVERRIDE_STRING_INIT_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_STRING_INIT_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.init_value = value
-        for substr, value in OVERRIDES["OVERRIDE_STRING_MAX_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_STRING_MAX_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.max_value = value
-        for substr, value in OVERRIDES["OVERRIDE_STRING_MIN_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_STRING_MIN_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.min_value = value
 
 
@@ -931,7 +932,7 @@ class StringArrayFlag(BFUFlag):
             self.min_value = flag["MinValue"]
 
     def __eq__(self, other):
-        if not type(other) == StringArrayFlag:
+        if not isinstance(other, StringArrayFlag):
             return NotImplemented
         if not super(StringArrayFlag, self).__eq__(super(StringArrayFlag, other)):
             return False
@@ -996,14 +997,14 @@ class StringArrayFlag(BFUFlag):
         """
         super(StringArrayFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["STRING_ARRAY_OVERRIDES"]
-        for substr, value in OVERRIDES["OVERRIDE_STRING_ARRAY_INIT_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_STRING_ARRAY_INIT_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.init_value = value
-        for substr, value in OVERRIDES["OVERRIDE_STRING_ARRAY_MAX_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_STRING_ARRAY_MAX_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.max_value = value
-        for substr, value in OVERRIDES["OVERRIDE_STRING_ARRAY_MIN_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_STRING_ARRAY_MIN_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.min_value = value
 
 
@@ -1141,14 +1142,14 @@ class Vec2Flag(BFUFlag):
         """
         super(Vec2Flag, self).use_name_to_override_params()
         OVERRIDES = overrides["VEC2_OVERRIDES"]
-        for substr, value in OVERRIDES["OVERRIDE_VEC2_INIT_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC2_INIT_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.init_value = value
-        for substr, value in OVERRIDES["OVERRIDE_VEC2_MAX_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC2_MAX_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.max_value = value
-        for substr, value in OVERRIDES["OVERRIDE_VEC2_MIN_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC2_MIN_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.min_value = value
 
 
@@ -1260,14 +1261,14 @@ class Vec2ArrayFlag(BFUFlag):
         """
         super(Vec2ArrayFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["VEC2_ARRAY_OVERRIDES"]
-        for substr, value in OVERRIDES["OVERRIDE_VEC2_ARRAY_INIT_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC2_ARRAY_INIT_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.init_value = value
-        for substr, value in OVERRIDES["OVERRIDE_VEC2_ARRAY_MAX_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC2_ARRAY_MAX_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.max_value = value
-        for substr, value in OVERRIDES["OVERRIDE_VEC2_ARRAY_MIN_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC2_ARRAY_MIN_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.min_value = value
 
 
@@ -1385,14 +1386,14 @@ class Vec3Flag(BFUFlag):
         """
         super(Vec3Flag, self).use_name_to_override_params()
         OVERRIDES = overrides["VEC3_OVERRIDES"]
-        for substr, value in OVERRIDES["OVERRIDE_VEC3_INIT_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC3_INIT_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.init_value = value
-        for substr, value in OVERRIDES["OVERRIDE_VEC3_MAX_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC3_MAX_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.max_value = value
-        for substr, value in OVERRIDES["OVERRIDE_VEC3_MIN_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC3_MIN_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.min_value = value
 
 
@@ -1518,14 +1519,14 @@ class Vec3ArrayFlag(BFUFlag):
         """
         super(Vec3ArrayFlag, self).use_name_to_override_params()
         OVERRIDES = overrides["VEC3_ARRAY_OVERRIDES"]
-        for substr, value in OVERRIDES["OVERRIDE_VEC3_ARRAY_INIT_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC3_ARRAY_INIT_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.init_value = value
-        for substr, value in OVERRIDES["OVERRIDE_VEC3_ARRAY_MAX_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC3_ARRAY_MAX_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.max_value = value
-        for substr, value in OVERRIDES["OVERRIDE_VEC3_ARRAY_MIN_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC3_ARRAY_MIN_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.min_value = value
 
 
@@ -1652,12 +1653,12 @@ class Vec4Flag(BFUFlag):
         """
         super(Vec4Flag, self).use_name_to_override_params()
         OVERRIDES = overrides["VEC4_OVERRIDES"]
-        for substr, value in OVERRIDES["OVERRIDE_VEC4_INIT_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC4_INIT_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.init_value = value
-        for substr, value in OVERRIDES["OVERRIDE_VEC4_MAX_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC4_MAX_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.max_value = value
-        for substr, value in OVERRIDES["OVERRIDE_VEC4_MIN_VALUE"].items():
-            if substr in self._data_name:
+        for regex, value in OVERRIDES["OVERRIDE_VEC4_MIN_VALUE"].items():
+            if re.search(regex, self.data_name):
                 self.min_value = value
