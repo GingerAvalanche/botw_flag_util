@@ -141,23 +141,10 @@ class FlagStore:
         return r
 
     def add(self, ftype: str, flag: BFUFlag) -> None:
-        if flag.hash_value in self._store[ftype]:
-            self.modify(ftype, flag.hash_value, flag)
-            return
         self._store[ftype][flag.hash_value] = flag
 
-    def modify(self, ftype: str, old_hash: int, new_flag: BFUFlag) -> None:
-        old_flag = self.find(ftype, old_hash)
-        if new_flag == old_flag:
-            return
-        self._store[ftype].pop(old_hash)
-        self._store[ftype][new_flag.hash_value] = new_flag
-
     def remove(self, ftype: str, hash: int) -> None:
-        flag = self.find(ftype, hash)
-        if flag.exists():
-            name = self._store[ftype][hash].data_name
-            self._store[ftype].pop(hash)
+        self._store[ftype].pop(hash, None)
 
     def get_num_new(self) -> int:
         r = 0
@@ -209,10 +196,9 @@ class FlagStore:
         return r
 
     def get_num_modified_svdata(self) -> int:
-        r = 0
-        for ftype in FLAG_MAPPING:
-            r += len(self.get_modified_ftype_svdata(ftype))
-        return r
+        """Always returns 0 because modifying anything about
+        a save flag will make it a new+delete instead"""
+        return 0
 
     def get_num_deleted_svdata(self) -> int:
         r = 0
@@ -229,14 +215,9 @@ class FlagStore:
         return r
 
     def get_modified_ftype_svdata(self, ftype: str) -> set:
-        r = set()
-        for _, flag in self._store[ftype].items():
-            if flag.hash_value in self._orig_store[ftype]:
-                old_flag = self._orig_store[ftype][flag.hash_value]
-                if flag.is_save or old_flag.is_save:
-                    if not flag == old_flag:
-                        r.add(flag.data_name)
-        return r
+        """Always returns empty because modifying anything about
+        a save flag will make it a new+delete instead"""
+        return set()
 
     def get_deleted_ftype_svdata(self, ftype: str) -> set:
         r = set()
