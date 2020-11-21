@@ -21,7 +21,7 @@ def find(args):
         numfound += len(found[ftype])
     for _, flags in found.items():
         for flag in flags:
-            if flag.is_save():
+            if flag.is_save:
                 numsv += 1
 
     while True:
