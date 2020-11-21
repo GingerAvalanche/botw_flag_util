@@ -1,3 +1,4 @@
+from oead.yaz0 import compress
 from pathlib import Path
 
 from . import util
@@ -37,30 +38,26 @@ def find(args):
         if selection == "v":
             for ftype, flags in found.items():
                 for flag in flags:
-                    if flag.is_save():
-                        string = f"{flag.get_name()} in {ftype} and in game_data.sav"
+                    if flag.is_save:
+                        string = f"{flag.data_name} in {ftype} and in game_data.sav"
                     else:
-                        string = f"{flag.get_name()} in {ftype}"
+                        string = f"{flag.data_name} in {ftype}"
                     print(string)
 
         elif selection == "d":
             for ftype, flags in found.items():
                 for flag in flags:
                     bgdata.remove(ftype, hash)
-            write_start = time.time()
             files_to_write: list = []
             files_to_write.append("GameData/gamedata.ssarc")
             files_to_write.append("GameData/savedataformat.ssarc")
-            orig_files = util.get_last_two_savedata_files(directory)
+            orig_files = util.get_last_two_savedata_files()
             datas_to_write: list = []
+            datas_to_write.append(compress(util.make_new_gamedata(bgdata, args.bigendian)))
             datas_to_write.append(
-                oead.yaz0.compress(util.make_new_gamedata(bgdata, args.bigendian))
+                compress(util.make_new_savedata(bgdata, args.bigendian, orig_files))
             )
-            datas_to_write.append(
-                oead.yaz0.compress(util.make_new_savedata(bgdata, args.bigendian, orig_files))
-            )
-            util.inject_files_into_bootup(bootup_path, files_to_write, datas_to_write)
-            write_time = time.time() - write_start
+            util.inject_files_into_bootup(files_to_write, datas_to_write)
             return
 
         elif selection == "x":
