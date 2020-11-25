@@ -170,6 +170,10 @@ class BFUFlag:
     def reset_type(self, reset_type: int) -> None:
         self._reset_type = reset_type
 
+    @property
+    def is_revival(self) -> bool:
+        return False
+
     def use_name_to_override_params(self) -> None:
         """
         Sets flag parameters to those mandated by the overrides.
