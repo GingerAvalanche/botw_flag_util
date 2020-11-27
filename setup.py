@@ -1,11 +1,13 @@
 import setuptools
 
+from botw_flag_util.__version__ import VERSION
+
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="botw_flag_util",
-    version="0.3.2",
+    version=VERSION,
     author="Ginger",
     author_email="chodness@gmail.com",
     description="Game data and save game data flag utilities for LoZ:BotW",
