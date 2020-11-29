@@ -47,7 +47,7 @@ def find(args):
         elif selection == "d":
             for ftype, flags in found.items():
                 for flag in flags:
-                    bgdata.remove(ftype, hash)
+                    bgdata.remove(ftype, flag.hash_value)
             files_to_write: list = []
             files_to_write.append("GameData/gamedata.ssarc")
             files_to_write.append("GameData/savedataformat.ssarc")
