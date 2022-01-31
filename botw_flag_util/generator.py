@@ -336,8 +336,8 @@ def generate_item_flags() -> None:
                 if tablekey.hash == zlib.crc32(b"TableNum"):
                     continue
                 for _, val in bshop.objects[str(tablename)].params.items():
-                    if isinstance(val, oead.FixedSafeString64):
-                        mod_s32.add(actor_s32_flag(f"{actor.stem}_{str(val)}"))
+                    if isinstance(val.v, oead.FixedSafeString64):
+                        mod_s32.add(actor_s32_flag(f"{actor.stem}_{str(val.v)}"))
             del bshop
         elif "Weapon_" in actor.name:
             mod_bool.add(actor_bool_flag(f"IsNewPictureBook_{actor.stem}"))

@@ -76,7 +76,9 @@
             "IsRegisteredPictureBook_Enemy_SiteBoss": 7,
             "Dungeon_Clear_": -1
         },
-        "OVERRIDE_BOOL_INIT_VALUE": {}
+        "OVERRIDE_BOOL_INIT_VALUE": {
+            "IsGet_": 0
+        }
     },
     "BOOL_ARRAY_OVERRIDES": {
         "OVERRIDE_BOOL_ARRAY_INIT_VALUE": {},

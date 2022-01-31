@@ -57,6 +57,19 @@ class BFUFlag:
             return False
         return True
 
+    def __repr__(self) -> str:
+        return (
+            f"BFUFlag(data_name={self.data_name}, "
+            f"delete_rev={self.delete_rev}, "
+            f"hash_value={self.hash_value}, "
+            f"is_event_associated={self.is_event_associated}, "
+            f"is_one_trigger={self.is_one_trigger}, "
+            f"is_program_readable={self.is_program_readable}, "
+            f"is_program_writable={self.is_program_writable}, "
+            f"is_save={self.is_save}, "
+            f"reset_type={self.reset_type})"
+        )
+
     @staticmethod
     def validate_Hash(hash: Hash) -> bool:
         """Returns True if all Hash properties are valid"""
@@ -233,6 +246,23 @@ class BoolFlag(BFUFlag):
             return False
         return True
 
+    def __repr__(self) -> str:
+        return (
+            f"BoolFlag(data_name={self.data_name}, "
+            f"delete_rev={self.delete_rev}, "
+            f"hash_value={self.hash_value}, "
+            f"is_event_associated={self.is_event_associated}, "
+            f"is_one_trigger={self.is_one_trigger}, "
+            f"is_program_readable={self.is_program_readable}, "
+            f"is_program_writable={self.is_program_writable}, "
+            f"is_save={self.is_save}, "
+            f"category={self.category}, "
+            f"init_value={self.init_value}, "
+            f"max_value={self.max_value}, "
+            f"min_value={self.min_value}, "
+            f"reset_type={self.reset_type})"
+        )
+
     @staticmethod
     def validate_Hash(hash: Hash) -> bool:
         """Returns True if all Hash properties are valid"""
@@ -339,6 +369,22 @@ class BoolArrayFlag(BFUFlag):
             return False
         return True
 
+    def __repr__(self) -> str:
+        return (
+            f"BoolArrayFlag(data_name={self.data_name}, "
+            f"delete_rev={self.delete_rev}, "
+            f"hash_value={self.hash_value}, "
+            f"is_event_associated={self.is_event_associated}, "
+            f"is_one_trigger={self.is_one_trigger}, "
+            f"is_program_readable={self.is_program_readable}, "
+            f"is_program_writable={self.is_program_writable}, "
+            f"is_save={self.is_save}, "
+            f"init_value={self.init_value}, "
+            f"max_value={self.max_value}, "
+            f"min_value={self.min_value}, "
+            f"reset_type={self.reset_type})"
+        )
+
     @staticmethod
     def validate_Hash(hash: Hash) -> bool:
         """Returns True if all Hash properties are valid"""
@@ -437,6 +483,22 @@ class S32Flag(BFUFlag):
             return False
         return True
 
+    def __repr__(self) -> str:
+        return (
+            f"S32Flag(data_name={self.data_name}, "
+            f"delete_rev={self.delete_rev}, "
+            f"hash_value={self.hash_value}, "
+            f"is_event_associated={self.is_event_associated}, "
+            f"is_one_trigger={self.is_one_trigger}, "
+            f"is_program_readable={self.is_program_readable}, "
+            f"is_program_writable={self.is_program_writable}, "
+            f"is_save={self.is_save}, "
+            f"init_value={self.init_value}, "
+            f"max_value={self.max_value}, "
+            f"min_value={self.min_value}, "
+            f"reset_type={self.reset_type})"
+        )
+
     @staticmethod
     def validate_Hash(hash: Hash) -> bool:
         """Returns True if all Hash properties are valid"""
@@ -533,6 +595,22 @@ class S32ArrayFlag(BFUFlag):
         ):
             return False
         return True
+
+    def __repr__(self) -> str:
+        return (
+            f"S32ArrayFlag(data_name={self.data_name}, "
+            f"delete_rev={self.delete_rev}, "
+            f"hash_value={self.hash_value}, "
+            f"is_event_associated={self.is_event_associated}, "
+            f"is_one_trigger={self.is_one_trigger}, "
+            f"is_program_readable={self.is_program_readable}, "
+            f"is_program_writable={self.is_program_writable}, "
+            f"is_save={self.is_save}, "
+            f"init_value={self.init_value}, "
+            f"max_value={self.max_value}, "
+            f"min_value={self.min_value}, "
+            f"reset_type={self.reset_type})"
+        )
 
     @staticmethod
     def validate_Hash(hash: Hash) -> bool:
@@ -631,6 +709,22 @@ class F32Flag(BFUFlag):
             return False
         return True
 
+    def __repr__(self) -> str:
+        return (
+            f"F32Flag(data_name={self.data_name}, "
+            f"delete_rev={self.delete_rev}, "
+            f"hash_value={self.hash_value}, "
+            f"is_event_associated={self.is_event_associated}, "
+            f"is_one_trigger={self.is_one_trigger}, "
+            f"is_program_readable={self.is_program_readable}, "
+            f"is_program_writable={self.is_program_writable}, "
+            f"is_save={self.is_save}, "
+            f"init_value={self.init_value}, "
+            f"max_value={self.max_value}, "
+            f"min_value={self.min_value}, "
+            f"reset_type={self.reset_type})"
+        )
+
     @staticmethod
     def validate_Hash(hash: Hash) -> bool:
         """Returns True if all Hash properties are valid"""
@@ -719,6 +813,22 @@ class F32ArrayFlag(BFUFlag):
         ):
             return False
         return True
+
+    def __repr__(self) -> str:
+        return (
+            f"F32ArrayFlag(data_name={self.data_name}, "
+            f"delete_rev={self.delete_rev}, "
+            f"hash_value={self.hash_value}, "
+            f"is_event_associated={self.is_event_associated}, "
+            f"is_one_trigger={self.is_one_trigger}, "
+            f"is_program_readable={self.is_program_readable}, "
+            f"is_program_writable={self.is_program_writable}, "
+            f"is_save={self.is_save}, "
+            f"init_value={self.init_value}, "
+            f"max_value={self.max_value}, "
+            f"min_value={self.min_value}, "
+            f"reset_type={self.reset_type})"
+        )
 
     @staticmethod
     def validate_Hash(hash: Hash) -> bool:
@@ -816,6 +926,22 @@ class StringFlag(BFUFlag):
         ):
             return False
         return True
+
+    def __repr__(self) -> str:
+        return (
+            f"StringFlag(data_name={self.data_name}, "
+            f"delete_rev={self.delete_rev}, "
+            f"hash_value={self.hash_value}, "
+            f"is_event_associated={self.is_event_associated}, "
+            f"is_one_trigger={self.is_one_trigger}, "
+            f"is_program_readable={self.is_program_readable}, "
+            f"is_program_writable={self.is_program_writable}, "
+            f"is_save={self.is_save}, "
+            f"init_value={self.init_value}, "
+            f"max_value={self.max_value}, "
+            f"min_value={self.min_value}, "
+            f"reset_type={self.reset_type})"
+        )
 
     @staticmethod
     def validate_Hash(hash: Hash) -> bool:
@@ -948,6 +1074,22 @@ class StringArrayFlag(BFUFlag):
             return False
         return True
 
+    def __repr__(self) -> str:
+        return (
+            f"StringArrayFlag(data_name={self.data_name}, "
+            f"delete_rev={self.delete_rev}, "
+            f"hash_value={self.hash_value}, "
+            f"is_event_associated={self.is_event_associated}, "
+            f"is_one_trigger={self.is_one_trigger}, "
+            f"is_program_readable={self.is_program_readable}, "
+            f"is_program_writable={self.is_program_writable}, "
+            f"is_save={self.is_save}, "
+            f"init_value={self.init_value}, "
+            f"max_value={self.max_value}, "
+            f"min_value={self.min_value}, "
+            f"reset_type={self.reset_type})"
+        )
+
     @staticmethod
     def validate_Hash(hash: Hash) -> bool:
         """Returns True if all Hash properties are valid"""
@@ -1076,6 +1218,22 @@ class Vec2Flag(BFUFlag):
             return False
         return True
 
+    def __repr__(self) -> str:
+        return (
+            f"Vec2Flag(data_name={self.data_name}, "
+            f"delete_rev={self.delete_rev}, "
+            f"hash_value={self.hash_value}, "
+            f"is_event_associated={self.is_event_associated}, "
+            f"is_one_trigger={self.is_one_trigger}, "
+            f"is_program_readable={self.is_program_readable}, "
+            f"is_program_writable={self.is_program_writable}, "
+            f"is_save={self.is_save}, "
+            f"init_value={self.init_value}, "
+            f"max_value={self.max_value}, "
+            f"min_value={self.min_value}, "
+            f"reset_type={self.reset_type})"
+        )
+
     @staticmethod
     def validate_Hash(hash: Hash) -> bool:
         """Returns True if all Hash properties are valid"""
@@ -1185,6 +1343,22 @@ class Vec2ArrayFlag(BFUFlag):
         ):
             return False
         return True
+
+    def __repr__(self) -> str:
+        return (
+            f"Vec2ArrayFlag(data_name={self.data_name}, "
+            f"delete_rev={self.delete_rev}, "
+            f"hash_value={self.hash_value}, "
+            f"is_event_associated={self.is_event_associated}, "
+            f"is_one_trigger={self.is_one_trigger}, "
+            f"is_program_readable={self.is_program_readable}, "
+            f"is_program_writable={self.is_program_writable}, "
+            f"is_save={self.is_save}, "
+            f"init_value={self.init_value}, "
+            f"max_value={self.max_value}, "
+            f"min_value={self.min_value}, "
+            f"reset_type={self.reset_type})"
+        )
 
     @staticmethod
     def validate_Hash(hash: Hash) -> bool:
@@ -1314,6 +1488,22 @@ class Vec3Flag(BFUFlag):
             return False
         return True
 
+    def __repr__(self) -> str:
+        return (
+            f"Vec3Flag(data_name={self.data_name}, "
+            f"delete_rev={self.delete_rev}, "
+            f"hash_value={self.hash_value}, "
+            f"is_event_associated={self.is_event_associated}, "
+            f"is_one_trigger={self.is_one_trigger}, "
+            f"is_program_readable={self.is_program_readable}, "
+            f"is_program_writable={self.is_program_writable}, "
+            f"is_save={self.is_save}, "
+            f"init_value={self.init_value}, "
+            f"max_value={self.max_value}, "
+            f"min_value={self.min_value}, "
+            f"reset_type={self.reset_type})"
+        )
+
     @staticmethod
     def validate_Hash(hash: Hash) -> bool:
         """Returns True if all Hash properties are valid"""
@@ -1437,6 +1627,22 @@ class Vec3ArrayFlag(BFUFlag):
         ):
             return False
         return True
+
+    def __repr__(self) -> str:
+        return (
+            f"Vec3ArrayFlag(data_name={self.data_name}, "
+            f"delete_rev={self.delete_rev}, "
+            f"hash_value={self.hash_value}, "
+            f"is_event_associated={self.is_event_associated}, "
+            f"is_one_trigger={self.is_one_trigger}, "
+            f"is_program_readable={self.is_program_readable}, "
+            f"is_program_writable={self.is_program_writable}, "
+            f"is_save={self.is_save}, "
+            f"init_value={self.init_value}, "
+            f"max_value={self.max_value}, "
+            f"min_value={self.min_value}, "
+            f"reset_type={self.reset_type})"
+        )
 
     @staticmethod
     def validate_Hash(hash: Hash) -> bool:
@@ -1574,6 +1780,22 @@ class Vec4Flag(BFUFlag):
         ):
             return False
         return True
+
+    def __repr__(self) -> str:
+        return (
+            f"Vec4Flag(data_name={self.data_name}, "
+            f"delete_rev={self.delete_rev}, "
+            f"hash_value={self.hash_value}, "
+            f"is_event_associated={self.is_event_associated}, "
+            f"is_one_trigger={self.is_one_trigger}, "
+            f"is_program_readable={self.is_program_readable}, "
+            f"is_program_writable={self.is_program_writable}, "
+            f"is_save={self.is_save}, "
+            f"init_value={self.init_value}, "
+            f"max_value={self.max_value}, "
+            f"min_value={self.min_value}, "
+            f"reset_type={self.reset_type})"
+        )
 
     @staticmethod
     def validate_Hash(hash: Hash) -> bool:

@@ -25,15 +25,16 @@ def find(args):
             if flag.is_save:
                 numsv += 1
 
+    print(
+        f"\n{numfound} gamedata flags and {numsv} savedata flags were found that matched {search_name}."
+    )
+    print("\nOptions:")
+    print("v - View the full flag names, files, and indices in their files")
+    print("d - Delete these flags and exit")
+    print("x - Exit without deleting the flags")
+
     while True:
-        print(
-            f"\n{numfound} gamedata flags and {numsv} savedata flags were found that matched {search_name}."
-        )
-        print("\nPlease choose an option:")
-        print("v - View the full flag names, files, and indices in their files")
-        print("d - Delete these flags and exit")
-        print("x - Exit without deleting the flags")
-        selection = input("(v/d/x):")
+        selection = input("\nPlease choose an option(v/d/x):")
 
         if selection == "v":
             for ftype, flags in found.items():
